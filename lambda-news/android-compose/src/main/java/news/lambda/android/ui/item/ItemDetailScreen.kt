@@ -1,4 +1,4 @@
-package news.lambda.android.ui
+package news.lambda.android.ui.item
 
 import androidx.compose.Composable
 import androidx.ui.foundation.Text

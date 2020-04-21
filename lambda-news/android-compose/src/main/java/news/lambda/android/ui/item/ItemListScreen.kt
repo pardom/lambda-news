@@ -1,4 +1,4 @@
-package news.lambda.android.ui
+package news.lambda.android.ui.item
 
 import android.net.Uri
 import android.text.format.DateUtils
@@ -32,6 +32,10 @@ import androidx.ui.unit.dp
 import arrow.core.Option
 import arrow.core.Some
 import news.lambda.android.Routes
+import news.lambda.android.ui.LightColors
+import news.lambda.android.ui.PlaceholderText
+import news.lambda.android.ui.R
+import news.lambda.android.ui.app.NavigatorAmbient
 import news.lambda.android.util.timeAgo
 import news.lambda.app.component.ItemListComponent.Msg
 import news.lambda.app.component.ItemListComponent.Props

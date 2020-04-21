@@ -1,4 +1,4 @@
-package news.lambda.android.ui
+package news.lambda.android.ui.app
 
 import androidx.compose.Composable
 import androidx.compose.Model
@@ -7,6 +7,10 @@ import androidx.compose.staticAmbientOf
 import androidx.ui.animation.Crossfade
 import androidx.ui.material.MaterialTheme
 import max.Navigator
+import news.lambda.android.ui.item.ItemDetailScreen
+import news.lambda.android.ui.item.ItemListScreen
+import news.lambda.android.ui.LightColors
+import news.lambda.android.ui.user.UserDetailScreen
 import news.lambda.app.component.AppComponent.Msg
 import news.lambda.app.component.AppComponent.Props
 import news.lambda.util.exhaustive

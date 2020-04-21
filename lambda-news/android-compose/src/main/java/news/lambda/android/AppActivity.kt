@@ -6,8 +6,8 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.ui.core.setContent
 import max.Navigator
-import news.lambda.android.ui.AppModel
-import news.lambda.android.ui.AppScreen
+import news.lambda.android.ui.app.AppModel
+import news.lambda.android.ui.app.AppScreen
 import news.lambda.android.ui.R
 import news.lambda.app.component.AppComponent.Msg
 import news.lambda.app.component.AppComponent.Props
