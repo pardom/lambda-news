@@ -4,12 +4,12 @@ import androidx.compose.Composable
 import androidx.ui.foundation.Text
 import androidx.ui.material.Scaffold
 import androidx.ui.material.TopAppBar
-import news.lambda.app.component.ItemDetailComponent.Msg
-import news.lambda.app.component.ItemDetailComponent.Props
+import news.lambda.app.component.UserDetailComponent.Msg
+import news.lambda.app.component.UserDetailComponent.Props
 import oolong.Dispatch
 
 @Composable
-fun ItemDetailScreen(props: Props, dispatch: Dispatch<Msg>) {
+fun UserDetailScreen(props: Props, dispatch: Dispatch<Msg>) {
     Scaffold(
         topAppBar = { Header(props, dispatch) },
         bodyContent = { Body(props) }

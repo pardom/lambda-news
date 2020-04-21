@@ -3,7 +3,9 @@ package news.lambda.app.component
 import arrow.core.identity
 import news.lambda.data.service.item.GetItemById
 import news.lambda.data.service.item.GetItemIdsByCategory
+import news.lambda.data.service.user.GetUserById
 import news.lambda.model.ItemId
+import news.lambda.model.UserId
 import oolong.Init
 import oolong.Next
 import oolong.Update
@@ -23,6 +25,7 @@ object AppComponent {
         sealed class Screen {
             data class ItemList(val model: ItemListComponent.Model) : Screen()
             data class ItemDetail(val model: ItemDetailComponent.Model) : Screen()
+            data class UserDetail(val model: UserDetailComponent.Model) : Screen()
         }
     }
 
@@ -41,6 +44,7 @@ object AppComponent {
 
         data class ItemList(val msg: ItemListComponent.Msg) : Msg()
         data class ItemDetail(val msg: ItemDetailComponent.Msg) : Msg()
+        data class UserDetail(val msg: UserDetailComponent.Msg) : Msg()
     }
 
     sealed class Props {
@@ -51,6 +55,7 @@ object AppComponent {
 
         data class ItemList(val props: ItemListComponent.Props) : Props()
         data class ItemDetail(val props: ItemDetailComponent.Props) : Props()
+        data class UserDetail(val props: UserDetailComponent.Props) : Props()
     }
 
     sealed class Route {
@@ -61,6 +66,7 @@ object AppComponent {
 
         object ItemList : Route()
         data class ItemDetail(val itemId: ItemId) : Route()
+        data class UserDetail(val userId: UserId) : Route()
     }
 
     // MVU triplet
@@ -68,15 +74,17 @@ object AppComponent {
     val init: (Route) -> Init<Model, Msg> =
         { route -> { mapRouteInit(route) } }
 
-    val update: (GetItemById, GetItemIdsByCategory) -> Update<Model, Msg> =
-        { getItemById, getItemIdsByCategory ->
+    val update: (GetItemById, GetItemIdsByCategory, GetUserById) -> Update<Model, Msg> =
+        { getItemById, getItemIdsByCategory, getUserById ->
             val updateItemList = updateItemList(getItemById, getItemIdsByCategory)
-            val updateItemDetail = updateItemDetail(getItemById);
+            val updateItemDetail = updateItemDetail(getItemById)
+            val updateUserDetail = updateUserDetail(getUserById);
             { msg, model ->
                 when (msg) {
                     is Msg.SetRoute -> mapRouteUpdate(msg, model)
                     is Msg.ItemList -> map(model, updateItemList(msg, model))
                     is Msg.ItemDetail -> map(model, updateItemDetail(msg, model))
+                    is Msg.UserDetail -> map(model, updateUserDetail(msg, model))
                 }
             }
         }
@@ -86,6 +94,7 @@ object AppComponent {
             when (model.screen) {
                 is Model.Screen.ItemList -> Props.ItemList(ItemListComponent.view(model.screen.model))
                 is Model.Screen.ItemDetail -> Props.ItemDetail(ItemDetailComponent.view(model.screen.model))
+                is Model.Screen.UserDetail -> Props.UserDetail(UserDetailComponent.view(model.screen.model))
             }
         }
 
@@ -115,6 +124,21 @@ object AppComponent {
                         itemDetailUpdate(msg.msg, model.screen.model),
                         Model.Screen::ItemDetail,
                         Msg::ItemDetail
+                    )
+                    else -> model.screen to none()
+                }
+            }
+        }
+
+    private val updateUserDetail: (GetUserById) -> (Msg.UserDetail, Model) -> Next<Model.Screen, Msg> =
+        { getUserById ->
+            val userDetailUpdate = UserDetailComponent.update(getUserById);
+            { msg, model ->
+                when (model.screen) {
+                    is Model.Screen.UserDetail -> bimap(
+                        userDetailUpdate(msg.msg, model.screen.model),
+                        Model.Screen::UserDetail,
+                        Msg::UserDetail
                     )
                     else -> model.screen to none()
                 }
@@ -166,6 +190,11 @@ object AppComponent {
                     ItemDetailComponent.init(route.itemId)(),
                     Model.Screen::ItemDetail,
                     Msg::ItemDetail
+                )
+                is Route.UserDetail -> bimap(
+                    UserDetailComponent.init(route.userId)(),
+                    Model.Screen::UserDetail,
+                    Msg::UserDetail
                 )
             }
         }

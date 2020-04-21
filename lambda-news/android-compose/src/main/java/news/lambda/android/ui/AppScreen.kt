@@ -37,6 +37,10 @@ fun AppScreen(appModel: AppModel, navigator: Navigator) {
                         props.props,
                         contramap(appModel.dispatch, Msg::ItemDetail)
                     )
+                    is Props.UserDetail -> UserDetailScreen(
+                        props.props,
+                        contramap(appModel.dispatch, Msg::UserDetail)
+                    )
                 }.exhaustive
             }
         }

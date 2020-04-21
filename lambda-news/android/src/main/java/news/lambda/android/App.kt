@@ -13,6 +13,7 @@ import news.lambda.app.component.AppComponent.Msg
 import news.lambda.app.component.AppComponent.Props
 import news.lambda.app.component.AppComponent.Route
 import news.lambda.model.ItemId
+import news.lambda.model.UserId
 import oolong.Oolong
 import oolong.Render
 
@@ -33,7 +34,10 @@ class App : Application(), OolongApplication<Msg, Props>, NavigatorApplication {
             }
         }
         path("/users") {
-            route("/:$USER_ID") {
+            route("/:$USER_ID") { request ->
+                val userId = UserId(request.params.getValue(USER_ID))
+                val setRouteMsg = request.createSetRouteMsg(Route.UserDetail(userId))
+                renderProxy.dispatch(setRouteMsg)
             }
         }
     }

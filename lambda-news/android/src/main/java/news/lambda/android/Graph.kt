@@ -6,6 +6,8 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import news.lambda.android.data.service.item.ItemService
 import news.lambda.android.data.service.item.api.retrofit.ItemApiService
+import news.lambda.android.data.service.user.api.UserService
+import news.lambda.android.data.service.user.api.retrofit.UserApiService
 import news.lambda.app.component.AppComponent
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -34,13 +36,17 @@ object Graph {
     private val itemApiService: ItemApiService =
         retrofit.create(ItemApiService::class.java)
 
+    private val userApiService: UserApiService =
+        retrofit.create(UserApiService::class.java)
+
     // Oolong
 
     val init = AppComponent.init
 
     val update = AppComponent.update(
         ItemService.getItemById(itemApiService),
-        ItemService.getItemIdsByCategory(itemApiService)
+        ItemService.getItemIdsByCategory(itemApiService),
+        UserService.getUserById(userApiService)
     )
 
     val view = AppComponent.view
