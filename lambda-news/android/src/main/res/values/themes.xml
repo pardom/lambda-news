@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.LambdaNews" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:statusBarColor">@color/primaryColor</item>
+    </style>
+
+    <style name="Theme.LambdaNews.Launcher" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:statusBarColor">@color/primaryColor</item>
+        <item name="android:windowBackground">@drawable/bg_launcher</item>
+    </style>
+
+</resources>

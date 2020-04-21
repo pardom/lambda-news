@@ -1,0 +1,30 @@
+### Intellij ###
+.idea
+*.iml
+out/
+
+local.properties
+
+### vim ###
+*.swp
+
+### VisualStudioCode ###
+.vscode
+
+### macOS ###
+.DS_Store
+
+### Gradle ###
+.gradle
+build/
+classes/
+
+### Node ###
+node_modules/
+
+### Dokka ###
+package-list
+
+### Samples ###
+samples/**/oolong.js
+samples/**/core.js
