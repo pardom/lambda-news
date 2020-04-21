@@ -14,12 +14,35 @@
             android:supportsRtl="true"
             android:theme="@style/Theme.LambdaNews.Launcher">
 
-        <activity android:name=".AppActivity">
+        <activity
+                android:name=".AppActivity"
+                android:launchMode="singleTop">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
 
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="https" />
+                <data android:scheme="http" />
+
+                <data
+                        android:host="lambda.news"
+                        android:pathPattern="/items" />
+                <data
+                        android:host="lambda.news"
+                        android:pathPattern="/items/.*" />
+                <data
+                        android:host="lambda.news"
+                        android:pathPattern="/users/.*" />
+
+            </intent-filter>
+        </activity>
     </application>
 </manifest>

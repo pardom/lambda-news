@@ -1,5 +1,7 @@
 package news.lambda.android
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.ui.core.setContent
@@ -10,6 +12,7 @@ import news.lambda.android.ui.R
 import news.lambda.app.component.AppComponent.Msg
 import news.lambda.app.component.AppComponent.Props
 import oolong.render
+import java.net.URI
 
 class AppActivity : AppCompatActivity() {
 
@@ -28,6 +31,16 @@ class AppActivity : AppCompatActivity() {
         setContent { AppScreen(appModel, navigator) }
     }
 
+    override fun onResume() {
+        super.onResume()
+        handleDeepLink(intent?.data)
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        handleDeepLink(intent?.data)
+    }
+
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
         OolongApplication.of<Msg, Props>(this).setRender(render)
@@ -44,4 +57,9 @@ class AppActivity : AppCompatActivity() {
         }
     }
 
+    private fun handleDeepLink(uri: Uri?) {
+        if (uri != null) {
+            navigator.push(URI(uri.path.toString()))
+        }
+    }
 }
