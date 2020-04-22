@@ -96,7 +96,7 @@ object ItemListComponent {
 
                 data class Loading(val itemId: ItemId) : Row()
 
-                data class Failure(val itemId: ItemId) : Row()
+                data class Failure(val load: ItemId) : Row()
 
                 data class Loaded(val item: Item) : Row()
             }
