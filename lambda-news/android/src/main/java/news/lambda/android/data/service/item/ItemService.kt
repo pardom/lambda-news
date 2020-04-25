@@ -1,5 +1,6 @@
 package news.lambda.android.data.service.item
 
+import com.dropbox.android.external.store4.MemoryPolicy.MemoryPolicyBuilder
 import com.dropbox.android.external.store4.StoreBuilder
 import com.dropbox.android.external.store4.StoreRequest
 import news.lambda.android.data.service.item.api.retrofit.ItemApiService
@@ -16,6 +17,7 @@ object ItemService {
         { itemApiService ->
             val store = StoreBuilder
                 .fromNonFlow(apiGetItemById(itemApiService))
+                .cachePolicy(MemoryPolicyBuilder().setMemorySize(1000).build())
                 .build();
 
             { itemId -> store.stream(StoreRequest.cached(itemId, true)).toEither() }
