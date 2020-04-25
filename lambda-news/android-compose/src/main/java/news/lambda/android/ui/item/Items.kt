@@ -122,7 +122,9 @@ fun Job(job: Job) {
     }
     Clickable(
         onClick = openChromeCustomTab,
-        modifier = Modifier.ripple() + Modifier.padding(16.dp, 8.dp, 0.dp, 8.dp)
+        modifier = Modifier.ripple()
+                + Modifier.fillMaxWidth()
+                + Modifier.padding(16.dp, 8.dp, 0.dp, 8.dp)
     ) {
         Column {
             val uri = job.uri
