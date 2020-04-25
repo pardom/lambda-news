@@ -6,9 +6,9 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.ui.core.setContent
 import max.Navigator
+import news.lambda.android.ui.R
 import news.lambda.android.ui.app.AppModel
 import news.lambda.android.ui.app.AppScreen
-import news.lambda.android.ui.R
 import news.lambda.app.component.AppComponent.Msg
 import news.lambda.app.component.AppComponent.Props
 import oolong.render
@@ -28,12 +28,8 @@ class AppActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(R.style.Theme_LambdaNews)
         super.onCreate(savedInstanceState)
+        handleDeepLink(intent?.data, savedInstanceState == null)
         setContent { AppScreen(appModel, navigator) }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        handleDeepLink(intent?.data)
     }
 
     override fun onNewIntent(intent: Intent?) {
@@ -57,9 +53,11 @@ class AppActivity : AppCompatActivity() {
         }
     }
 
-    private fun handleDeepLink(uri: Uri?) {
+    private fun handleDeepLink(uri: Uri?, replace: Boolean = false) {
         if (uri != null) {
-            navigator.push(URI(uri.path.toString()))
+            val route = URI(uri.path.toString())
+            if (replace) navigator.set(route)
+            else navigator.push(route)
         }
     }
 }
