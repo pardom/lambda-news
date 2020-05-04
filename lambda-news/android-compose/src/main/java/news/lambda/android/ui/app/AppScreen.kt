@@ -4,12 +4,11 @@ import androidx.compose.Composable
 import androidx.compose.Model
 import androidx.compose.Providers
 import androidx.compose.staticAmbientOf
-import androidx.ui.animation.Crossfade
 import androidx.ui.material.MaterialTheme
 import max.Navigator
+import news.lambda.android.ui.LightColors
 import news.lambda.android.ui.item.ItemDetailScreen
 import news.lambda.android.ui.item.ItemListScreen
-import news.lambda.android.ui.LightColors
 import news.lambda.android.ui.user.UserDetailScreen
 import news.lambda.app.component.AppComponent.Msg
 import news.lambda.app.component.AppComponent.Props
@@ -29,24 +28,24 @@ class AppModel(
 fun AppScreen(appModel: AppModel, navigator: Navigator) {
     Providers(NavigatorAmbient provides navigator) {
         MaterialTheme(LightColors) {
-            Crossfade(appModel.props.javaClass.simpleName) {
-                when (val props = appModel.props) {
-                    is Props.Uninitialized -> {
-                    }
-                    is Props.ItemList -> ItemListScreen(
-                        props.props,
-                        contramap(appModel.dispatch, Msg::ItemList)
-                    )
-                    is Props.ItemDetail -> ItemDetailScreen(
-                        props.props,
-                        contramap(appModel.dispatch, Msg::ItemDetail)
-                    )
-                    is Props.UserDetail -> UserDetailScreen(
-                        props.props,
-                        contramap(appModel.dispatch, Msg::UserDetail)
-                    )
-                }.exhaustive
-            }
+            //Crossfade(appModel.props.javaClass.simpleName) {
+            when (val props = appModel.props) {
+                is Props.Uninitialized -> {
+                }
+                is Props.ItemList -> ItemListScreen(
+                    props.props,
+                    contramap(appModel.dispatch, Msg::ItemList)
+                )
+                is Props.ItemDetail -> ItemDetailScreen(
+                    props.props,
+                    contramap(appModel.dispatch, Msg::ItemDetail)
+                )
+                is Props.UserDetail -> UserDetailScreen(
+                    props.props,
+                    contramap(appModel.dispatch, Msg::UserDetail)
+                )
+            }.exhaustive
+            //}
         }
     }
 }

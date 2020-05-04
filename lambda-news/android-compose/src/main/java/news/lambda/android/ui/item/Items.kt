@@ -9,7 +9,6 @@ import androidx.ui.foundation.Clickable
 import androidx.ui.foundation.Icon
 import androidx.ui.foundation.Text
 import androidx.ui.graphics.Color
-import androidx.ui.graphics.toArgb
 import androidx.ui.layout.Column
 import androidx.ui.layout.Row
 import androidx.ui.layout.fillMaxHeight
@@ -23,7 +22,6 @@ import androidx.ui.tooling.preview.Preview
 import androidx.ui.unit.dp
 import arrow.core.Some
 import news.lambda.android.Routes
-import news.lambda.android.ui.LightColors
 import news.lambda.android.ui.PlaceholderText
 import news.lambda.android.ui.R.drawable
 import news.lambda.android.ui.app.NavigatorAmbient
@@ -61,7 +59,6 @@ fun Story(story: Story) {
         val uri = story.uri.orNull()
         if (uri != null) {
             CustomTabsIntent.Builder()
-                .setToolbarColor(LightColors.primary.toArgb())
                 .setShowTitle(true)
                 .build()
                 .launchUrl(context, Uri.parse(uri.toString()))
@@ -114,7 +111,6 @@ fun Job(job: Job) {
         val uri = job.uri.orNull()
         if (uri != null) {
             CustomTabsIntent.Builder()
-                .setToolbarColor(LightColors.primary.toArgb())
                 .setShowTitle(true)
                 .build()
                 .launchUrl(context, Uri.parse(uri.toString()))

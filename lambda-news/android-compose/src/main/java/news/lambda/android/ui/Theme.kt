@@ -1,13 +1,11 @@
 package news.lambda.android.ui
 
 import androidx.ui.graphics.Color
-import androidx.ui.material.darkColorPalette
 import androidx.ui.material.lightColorPalette
 
 val LightColors = lightColorPalette(
-    primary = Color(0xFFFFFFFF),
-    primaryVariant = Color(0xFFCCCCCC),
-    secondary = Color(0xFFFFAB00),
-    secondaryVariant = Color(0xFFC67C00),
-    onPrimary = Color.Black
+    primary = Color(0xFFff6f00),
+    primaryVariant = Color(0xFFc43e00),
+    secondary = Color(0xFF2962ff),
+    secondaryVariant = Color(0xFF0039cb)
 )

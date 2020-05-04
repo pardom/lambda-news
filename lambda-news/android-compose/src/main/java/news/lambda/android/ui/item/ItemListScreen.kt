@@ -35,9 +35,7 @@ fun Header(header: Props.Header, dispatch: Dispatch<Msg>) {
             )
             TabRow(
                 items = header.tabs,
-                selectedIndex = header.tabs.indexOfFirst(Props.Header.Tab::selected),
-                contentColor = MaterialTheme.colors.secondary,
-                divider = {}
+                selectedIndex = header.tabs.indexOfFirst(Props.Header.Tab::selected)
             ) { _, tab ->
                 Tab(
                     text = { Text(tab.text) },

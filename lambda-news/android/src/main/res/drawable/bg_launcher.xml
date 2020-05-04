@@ -3,4 +3,10 @@
 
     <item android:drawable="@color/primaryColor" />
 
+    <item
+            android:width="256dp"
+            android:height="256dp"
+            android:drawable="@drawable/bg_launcher_icon"
+            android:gravity="center" />
+
 </layer-list>
