@@ -1,7 +1,7 @@
 package deps
 
 object Android {
-    object Gradle : Group("com.android.tools.build", "4.1.0-alpha06") {
+    object Gradle : Group("com.android.tools.build", "4.1.0-alpha09") {
         val Plugin = artifact("gradle")
     }
 
@@ -11,12 +11,14 @@ object Android {
         val Browser = dependency("androidx.browser", "browser", "1.2.0")
         val Core = dependency("androidx.core", "core-ktx", "1.2.0")
 
-        object Compose : Group("androidx.compose", "0.1.0-dev09") {
+        object Compose : Group("androidx.compose", "0.1.0-dev11") {
             val Runtime = artifact("compose-runtime")
         }
 
         object Ui : Group("androidx.ui", Compose.version) {
-            val Framework = artifact("ui-framework")
+            val Animation = artifact("ui-animation")
+            val Core = artifact("ui-core")
+            val Foundation = artifact("ui-foundation")
             val Layout = artifact("ui-layout")
             val Material = artifact("ui-material")
             val Tooling = artifact("ui-tooling")
@@ -37,7 +39,7 @@ object Dropbox {
 object Facebook {
     val SoLoader = dependency("com.facebook.soloader", "soloader", "0.9.0")
 
-    object Flipper : Group("com.facebook.flipper", "0.37.0") {
+    object Flipper : Group("com.facebook.flipper", "0.43.0") {
         val Debug = artifact("flipper")
         val Release = artifact("flipper-noop")
         val Network = artifact("flipper-network-plugin")
@@ -45,7 +47,7 @@ object Facebook {
 }
 
 object Kotlin : Group("org.jetbrains.kotlin", "1.3.72") {
-    object Coroutines : Group("org.jetbrains.kotlinx", "1.3.5") {
+    object Coroutines : Group("org.jetbrains.kotlinx", "1.3.6") {
         val Android = artifact("kotlinx-coroutines-android")
 
         object Core {
@@ -69,7 +71,7 @@ object Kotlin : Group("org.jetbrains.kotlin", "1.3.72") {
 
 object Max : Group("com.michaelpardo", "0.1.0-SNAPSHOT") {
     val Navigator = artifact("max-navigator")
-    val Router = artifact("max-router")
+    val Uri = artifact("max-uri")
 }
 
 object Square {
@@ -77,7 +79,7 @@ object Square {
         val Kotlin = artifact("moshi-kotlin")
     }
 
-    object Retrofit : Group("com.squareup.retrofit2", "2.7.2") {
+    object Retrofit : Group("com.squareup.retrofit2", "2.9.0") {
         val Core = artifact("retrofit")
 
         object Converter {
@@ -86,4 +88,4 @@ object Square {
     }
 }
 
-val Oolong = dependency("org.oolong-kt", "oolong", "2.0.3-SNAPSHOT")
+val Oolong = dependency("org.oolong-kt", "oolong", "2.0.4")
