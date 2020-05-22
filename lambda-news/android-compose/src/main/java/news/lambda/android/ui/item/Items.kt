@@ -132,7 +132,9 @@ fun StoryRow_(story: Story) {
             if (uri is Some) {
                 Favicon(uri.t)
                 Source(uri.t)
-                Preview(uri.t)
+                Box(modifier = Modifier.height(64.dp)) {
+                    Preview(uri.t)
+                }
             }
             Title(story.title)
             Subtitle(story.authorId, story.createdAt, story.descendantCount)
@@ -174,14 +176,14 @@ fun StoryRow(story: Story) {
             }
             if (uri is Some) {
                 Spacer(modifier = Modifier.size(8.dp))
-                Preview(uri.t)
+                RoundedPreview(uri.t, Modifier.height(64.dp))
             }
         }
     }
 }
 
 @Composable
-private fun Favicon(uri: Uri) {
+fun Favicon(uri: Uri) {
     val tld = uri.tld
     if (tld != null) {
         Box(modifier = Modifier.tag("favicon").size(10.dp)) {
@@ -191,7 +193,7 @@ private fun Favicon(uri: Uri) {
 }
 
 @Composable
-private fun Source(uri: Uri) {
+fun Source(uri: Uri) {
     val tld = uri.tld
     if (tld != null) {
         Text(
@@ -203,7 +205,7 @@ private fun Source(uri: Uri) {
 }
 
 @Composable
-private fun Title(title: String) {
+fun Title(title: String) {
     Text(
         title,
         modifier = Modifier.tag("title"),
@@ -214,7 +216,7 @@ private fun Title(title: String) {
 }
 
 @Composable
-private fun Subtitle(author: UserId, createdAt: UnixTime, commentCount: Long) {
+fun Subtitle(author: UserId, createdAt: UnixTime, commentCount: Long) {
     Text(
         "$commentCount comments · ${author.value} · ${createdAt.timeAgo}",
         modifier = Modifier.tag("subtitle"),
@@ -223,7 +225,12 @@ private fun Subtitle(author: UserId, createdAt: UnixTime, commentCount: Long) {
 }
 
 @Composable
-private fun Preview(uri: Uri) {
+fun RoundedPreview(uri: Uri, modifier: Modifier = Modifier) {
+    Preview(uri, modifier + Modifier.clip(RoundedCornerShape(4.dp)))
+}
+
+@Composable
+fun Preview(uri: Uri, modifier: Modifier = Modifier) {
     val context = ContextAmbient.current
     val openChromeCustomTab = {
         CustomTabsIntent.Builder()
@@ -232,12 +239,7 @@ private fun Preview(uri: Uri) {
             .launchUrl(context, uri.toAndroidUri())
     }
     Box(
-        modifier = Modifier
-            .tag("preview")
-            .clip(RoundedCornerShape(4.dp))
-            .height(64.dp)
-            .aspectRatio(1.6F)
-        ,
+        modifier = modifier + Modifier.tag("preview").aspectRatio(1.6F),
         backgroundColor = Color(0x22000000)
     ) {
         Clickable(

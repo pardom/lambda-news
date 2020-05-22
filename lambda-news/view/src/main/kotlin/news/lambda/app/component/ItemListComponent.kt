@@ -5,10 +5,7 @@ import arrow.core.Either.Left
 import arrow.core.Either.Right
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.map
-import news.lambda.app.component.ItemListComponent.Msg.CategorySelected
-import news.lambda.app.component.ItemListComponent.Msg.ItemRequested
-import news.lambda.app.component.ItemListComponent.Msg.SetCategoryItemIds
-import news.lambda.app.component.ItemListComponent.Msg.SetItem
+import news.lambda.app.component.ItemListComponent.Msg.*
 import news.lambda.data.service.item.GetItemById
 import news.lambda.data.service.item.GetItemIdsByCategory
 import news.lambda.model.Item
@@ -16,19 +13,10 @@ import news.lambda.model.Item.Category
 import news.lambda.model.Item.Category.JOB
 import news.lambda.model.ItemId
 import news.lambda.model.RemoteData
-import news.lambda.model.RemoteData.Failure
-import news.lambda.model.RemoteData.Loading
-import news.lambda.model.RemoteData.NotAsked
-import news.lambda.model.RemoteData.Success
+import news.lambda.model.RemoteData.*
 import news.lambda.model.toRemoteData
 import news.lambda.util.msgEffect
-import oolong.Dispatch
-import oolong.Effect
-import oolong.Init
-import oolong.Next
-import oolong.Update
-import oolong.View
-import oolong.effect
+import oolong.*
 import oolong.effect.none
 
 object ItemListComponent {
@@ -143,10 +131,10 @@ object ItemListComponent {
         { getItemById ->
             val getItemByIdEffect = getItemByIdEffect(getItemById);
             { msg, model ->
-                val loading = model.items[msg.itemId] is RemoteData.Loading
+                val loading = model.items[msg.itemId] is Loading
                 val effect = if (loading) none() else getItemByIdEffect(msg.itemId)
                 model.copy(
-                    items = model.items + (msg.itemId to RemoteData.Loading)
+                    items = model.items + (msg.itemId to Loading)
                 ) to effect
             }
         }
