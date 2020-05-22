@@ -6,7 +6,7 @@
     </style>
 
     <style name="Theme.LambdaNews.Launcher" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="android:statusBarColor">@color/primaryColor</item>
+        <item name="android:statusBarColor">@color/secondaryColor</item>
         <item name="android:windowBackground">@drawable/bg_launcher</item>
     </style>
 

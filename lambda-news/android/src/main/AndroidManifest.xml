@@ -1,22 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-        package="news.lambda.android">
+    package="news.lambda.android">
 
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
-            android:name=".App"
-            android:allowBackup="true"
-            android:icon="@mipmap/ic_launcher_round"
-            android:label="@string/app_label"
-            android:roundIcon="@mipmap/ic_launcher_round"
-            android:supportsRtl="true"
-            android:theme="@style/Theme.LambdaNews.Launcher">
+        android:name=".App"
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher_round"
+        android:label="@string/app_label"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.LambdaNews.Launcher"
+        android:usesCleartextTraffic="true">
 
         <activity
-                android:name=".AppActivity"
-                android:launchMode="singleTop">
+            android:name=".AppActivity"
+            android:launchMode="singleTop">
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -33,14 +34,14 @@
                 <data android:scheme="http" />
 
                 <data
-                        android:host="lambda.news"
-                        android:pathPattern="/items" />
+                    android:host="lambda.news"
+                    android:pathPattern="/items" />
                 <data
-                        android:host="lambda.news"
-                        android:pathPattern="/items/.*" />
+                    android:host="lambda.news"
+                    android:pathPattern="/items/.*" />
                 <data
-                        android:host="lambda.news"
-                        android:pathPattern="/users/.*" />
+                    android:host="lambda.news"
+                    android:pathPattern="/users/.*" />
 
             </intent-filter>
         </activity>

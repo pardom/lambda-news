@@ -1,17 +1,15 @@
 package news.lambda.android.ui.item
 
 import androidx.compose.Composable
+import androidx.ui.core.Modifier
 import androidx.ui.foundation.AdapterList
 import androidx.ui.foundation.Text
 import androidx.ui.graphics.Color
 import androidx.ui.layout.Column
-import androidx.ui.material.Divider
-import androidx.ui.material.MaterialTheme
-import androidx.ui.material.Scaffold
-import androidx.ui.material.Surface
-import androidx.ui.material.Tab
-import androidx.ui.material.TabRow
-import androidx.ui.material.TopAppBar
+import androidx.ui.layout.fillMaxWidth
+import androidx.ui.layout.padding
+import androidx.ui.material.*
+import androidx.ui.text.style.TextAlign
 import androidx.ui.unit.dp
 import news.lambda.app.component.ItemListComponent.Msg
 import news.lambda.app.component.ItemListComponent.Props
@@ -30,12 +28,19 @@ fun Header(header: Props.Header, dispatch: Dispatch<Msg>) {
     Surface(elevation = 4.dp) {
         Column {
             TopAppBar(
-                title = { Text("λ News") },
+                title = {
+                    Text(
+                        "λ News",
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth().padding(end = 16.dp)
+                    )
+                },
                 elevation = 0.dp
             )
             TabRow(
                 items = header.tabs,
-                selectedIndex = header.tabs.indexOfFirst(Props.Header.Tab::selected)
+                selectedIndex = header.tabs.indexOfFirst(Props.Header.Tab::selected),
+                contentColor = MaterialTheme.colors.secondary
             ) { _, tab ->
                 Tab(
                     text = { Text(tab.text) },
