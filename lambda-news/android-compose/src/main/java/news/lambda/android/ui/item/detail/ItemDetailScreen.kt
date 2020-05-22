@@ -7,7 +7,6 @@ import androidx.ui.foundation.AdapterList
 import androidx.ui.foundation.Text
 import androidx.ui.layout.Column
 import androidx.ui.layout.Spacer
-import androidx.ui.layout.height
 import androidx.ui.layout.padding
 import androidx.ui.layout.size
 import androidx.ui.material.MaterialTheme
