@@ -6,6 +6,7 @@ import com.facebook.flipper.android.utils.FlipperUtils
 import com.facebook.flipper.plugins.inspector.DescriptorMapping
 import com.facebook.flipper.plugins.inspector.InspectorFlipperPlugin
 import com.facebook.soloader.SoLoader
+import kotlinx.coroutines.Dispatchers
 import max.Navigator
 import news.lambda.android.oolong.RenderProxy
 import news.lambda.android.util.createSetRouteMsg
@@ -58,7 +59,10 @@ class App : Application(), OolongApplication<Msg, Props>, NavigatorApplication {
             Graph.init(Route.ItemList),
             Graph.update,
             Graph.view,
-            renderProxy
+            renderProxy,
+            Dispatchers.Main,
+            Dispatchers.Main,
+            Dispatchers.IO
         )
     }
 
