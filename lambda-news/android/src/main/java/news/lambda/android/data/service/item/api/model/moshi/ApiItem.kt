@@ -1,11 +1,11 @@
 package news.lambda.android.data.service.item.api.model.moshi
 
 import arrow.core.toOption
+import max.Uri
 import news.lambda.model.Item
 import news.lambda.model.ItemId
 import news.lambda.model.UnixTime
 import news.lambda.model.UserId
-import java.net.URI
 
 data class ApiItem(
     val id: Long,
@@ -43,7 +43,7 @@ data class ApiItem(
         UnixTime(time * 1000),
         requireNotNull(score),
         requireNotNull(title),
-        url.toOption().map(URI::create)
+        url.toOption().map((Uri)::parse)
     )
 
     private fun toStory() = Item.Story(
@@ -55,7 +55,7 @@ data class ApiItem(
         requireNotNull(score),
         requireNotNull(title),
         text.toOption(),
-        url.toOption().map(URI::create)
+        url.toOption().map((Uri)::parse)
     )
 
     private fun toComment() = Item.Comment(

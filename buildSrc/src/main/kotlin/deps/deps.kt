@@ -32,6 +32,12 @@ object Arrow : Group("io.arrow-kt", "0.10.5") {
     val Syntax = artifact("arrow-syntax")
 }
 
+object ChrisBanes {
+    object Accompanist : Group("dev.chrisbanes.accompanist", "0.1.2") {
+        val Coil = artifact("accompanist-coil")
+    }
+}
+
 object Dropbox {
     val Store = dependency("com.dropbox.mobile.store", "store4", "4.0.0-alpha03")
 }
@@ -69,9 +75,9 @@ object Kotlin : Group("org.jetbrains.kotlin", "1.3.72") {
     }
 }
 
-object Max : Group("com.michaelpardo", "0.1.0-SNAPSHOT") {
-    val Navigator = artifact("max-navigator")
-    val Uri = artifact("max-uri")
+object Max : Group("com.michaelpardo.max", "0.1.0-SNAPSHOT") {
+    val Navigator = artifact("navigator")
+    val Uri = artifact("uri")
 }
 
 object Square {

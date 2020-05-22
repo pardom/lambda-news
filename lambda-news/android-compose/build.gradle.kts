@@ -48,6 +48,7 @@ dependencies {
     implementation(deps.Android.X.Ui.Tooling)
     implementation(deps.Arrow.Core)
     implementation(deps.Arrow.Syntax)
+    implementation(deps.ChrisBanes.Accompanist.Coil)
     implementation(deps.Kotlin.Coroutines.Android)
     implementation(deps.Kotlin.StdLib.Jvm)
     implementation(deps.Max.Navigator)

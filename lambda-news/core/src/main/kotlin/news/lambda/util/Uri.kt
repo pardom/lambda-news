@@ -1,6 +1,6 @@
 package news.lambda.util
 
-import java.net.URI
+import max.Uri
 
-val URI.tld: String
-    get() = host.split('.').takeLast(2).joinToString(".")
+val Uri.tld: String?
+    get() = host?.split('.')?.takeLast(2)?.joinToString(".")

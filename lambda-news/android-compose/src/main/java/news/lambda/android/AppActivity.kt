@@ -1,18 +1,18 @@
 package news.lambda.android
 
 import android.content.Intent
-import android.net.Uri
+import android.net.Uri as AndroidUri
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.ui.core.setContent
 import max.Navigator
+import max.Uri
 import news.lambda.android.ui.R
 import news.lambda.android.ui.app.AppModel
 import news.lambda.android.ui.app.AppScreen
 import news.lambda.app.component.AppComponent.Msg
 import news.lambda.app.component.AppComponent.Props
 import oolong.render
-import java.net.URI
 
 class AppActivity : AppCompatActivity() {
 
@@ -53,9 +53,9 @@ class AppActivity : AppCompatActivity() {
         }
     }
 
-    private fun handleDeepLink(uri: Uri?, replace: Boolean = false) {
+    private fun handleDeepLink(uri: AndroidUri?, replace: Boolean = false) {
         if (uri != null) {
-            val route = URI(uri.path.toString())
+            val route = Uri.parse(uri.path.toString())
             if (replace) navigator.set(route)
             else navigator.push(route)
         }

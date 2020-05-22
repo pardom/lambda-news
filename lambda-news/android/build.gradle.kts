@@ -37,6 +37,7 @@ dependencies {
     implementation(deps.Kotlin.Coroutines.Android)
     implementation(deps.Kotlin.StdLib.Jvm)
     implementation(deps.Max.Navigator)
+    implementation(deps.Max.Uri)
     implementation(deps.Oolong)
     implementation(deps.Square.Moshi.Kotlin)
     implementation(deps.Square.Retrofit.Converter.Moshi)

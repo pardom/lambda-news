@@ -1,16 +1,16 @@
 package news.lambda.android
 
+import max.Uri
 import news.lambda.model.ItemId
 import news.lambda.model.UserId
-import java.net.URI
 
 object Routes {
 
-    private const val URI_BASE = "http://lambda.news"
+    private const val URI_BASE = "https://lambda.news"
 
-    fun itemList(): URI = URI("$URI_BASE/items")
+    fun itemList(): Uri = Uri.parse("$URI_BASE/items")
 
-    fun itemDetail(itemId: ItemId): URI = URI("$URI_BASE/items/${itemId.value}")
+    fun itemDetail(itemId: ItemId): Uri = Uri.parse("$URI_BASE/items/${itemId.value}")
 
-    fun userDetail(userId: UserId): URI = URI("$URI_BASE/users/${userId.value}")
+    fun userDetail(userId: UserId): Uri = Uri.parse("$URI_BASE/users/${userId.value}")
 }

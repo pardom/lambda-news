@@ -8,4 +8,5 @@ dependencies {
     implementation(deps.Arrow.Syntax)
     implementation(deps.Kotlin.StdLib.Jvm)
     implementation(deps.Kotlin.Coroutines.Core.Jvm)
+    implementation(deps.Max.Uri)
 }

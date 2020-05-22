@@ -1,7 +1,7 @@
 package news.lambda.model
 
 import arrow.core.Option
-import java.net.URI
+import max.Uri
 
 sealed class Item {
 
@@ -30,7 +30,7 @@ sealed class Item {
     }
 
     interface WithUri {
-        val uri: Option<URI>
+        val uri: Option<Uri>
     }
 
     interface WithDescendants {
@@ -46,7 +46,7 @@ sealed class Item {
         override val score: Long,
         override val title: String,
         override val text: Option<String>,
-        override val uri: Option<URI>
+        override val uri: Option<Uri>
     ) : Item(), WithChildIds, WithDescendants, WithScore, WithTitle, WithText, WithUri
 
     data class Comment(
@@ -64,7 +64,7 @@ sealed class Item {
         override val createdAt: UnixTime,
         override val score: Long,
         override val title: String,
-        override val uri: Option<URI>
+        override val uri: Option<Uri>
     ) : Item(), WithScore, WithTitle, WithUri
 
     data class Ask(
@@ -76,7 +76,7 @@ sealed class Item {
         override val score: Long,
         override val title: String,
         override val text: Option<String>,
-        override val uri: Option<URI>
+        override val uri: Option<Uri>
     ) : Item(), WithChildIds, WithDescendants, WithScore, WithTitle, WithText, WithUri
 
     data class Poll(
