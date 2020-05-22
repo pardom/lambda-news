@@ -3,14 +3,28 @@ package news.lambda.android.ui.item
 import android.text.format.DateUtils
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.Composable
-import androidx.ui.core.*
+import androidx.ui.core.Alignment
+import androidx.ui.core.ContextAmbient
+import androidx.ui.core.Modifier
+import androidx.ui.core.clip
+import androidx.ui.core.tag
 import androidx.ui.foundation.Box
 import androidx.ui.foundation.Clickable
 import androidx.ui.foundation.Icon
 import androidx.ui.foundation.Text
 import androidx.ui.foundation.shape.corner.RoundedCornerShape
 import androidx.ui.graphics.Color
-import androidx.ui.layout.*
+import androidx.ui.layout.Column
+import androidx.ui.layout.Row
+import androidx.ui.layout.Spacer
+import androidx.ui.layout.aspectRatio
+import androidx.ui.layout.fillMaxSize
+import androidx.ui.layout.fillMaxWidth
+import androidx.ui.layout.height
+import androidx.ui.layout.padding
+import androidx.ui.layout.preferredHeight
+import androidx.ui.layout.size
+import androidx.ui.layout.width
 import androidx.ui.material.MaterialTheme
 import androidx.ui.material.ripple.ripple
 import androidx.ui.res.vectorResource
@@ -28,7 +42,6 @@ import news.lambda.android.ui.app.NavigatorAmbient
 import news.lambda.android.util.timeAgo
 import news.lambda.android.util.toAndroidUri
 import news.lambda.model.Item
-import news.lambda.model.Item.*
 import news.lambda.model.ItemId
 import news.lambda.model.UnixTime
 import news.lambda.model.UserId
@@ -37,10 +50,10 @@ import news.lambda.util.tld
 @Composable
 fun Item(item: Item) {
     when (item) {
-        is Story -> StoryRow(item)
-        is Job -> Job(item)
-        is Ask -> Ask(item)
-        is Poll -> Poll(item)
+        is Item.Story -> StoryRow(item)
+        is Item.Job -> Job(item)
+        is Item.Ask -> Ask(item)
+        is Item.Poll -> Poll(item)
     }
 }
 
@@ -54,96 +67,7 @@ fun Loading() {
 }
 
 @Composable
-fun StoryRow_(story: Story) {
-    val navigator = NavigatorAmbient.current
-    val navigateToDetails = {
-        val route = Routes.itemDetail(story.id)
-        navigator.push(route)
-        Unit
-    }
-    Clickable(
-        onClick = navigateToDetails,
-        modifier = Modifier.ripple().fillMaxWidth()
-    ) {
-        ConstraintLayout(constraintSet = ConstraintSet {
-            val hasUri = story.uri is Some
-
-            val favicon = tag("favicon")
-            val source = tag("source")
-            val title = tag("title")
-            val subtitle = tag("subtitle")
-            val preview = tag("preview")
-
-            favicon.apply {
-                left constrainTo parent.left
-                top constrainTo parent.top
-
-                left.margin = 16.dp
-                top.margin = 16.dp
-            }
-
-            source.apply {
-                width = spread
-
-                left constrainTo favicon.right
-                top constrainTo favicon.top
-                right constrainTo preview.left
-                bottom constrainTo favicon.bottom
-
-                left.margin = 4.dp
-            }
-
-            title.apply {
-                width = spread
-
-                top constrainTo if (hasUri) favicon.bottom else parent.top
-                left constrainTo parent.left
-                right constrainTo if (hasUri) preview.left else parent.right
-
-                left.margin = 16.dp
-                top.margin = if (hasUri) 4.dp else 16.dp
-                right.margin = 16.dp
-                bottom.margin = 16.dp
-            }
-
-            subtitle.apply {
-                width = spread
-
-                left constrainTo title.left
-                top constrainTo title.bottom
-                right constrainTo title.right
-                bottom constrainTo parent.bottom
-
-                top.margin = 4.dp
-                bottom.margin = 16.dp
-            }
-
-            preview.apply {
-                right constrainTo parent.right
-                top constrainTo parent.top
-                bottom constrainTo parent.bottom
-
-                right.margin = 16.dp
-                top.margin = 16.dp
-                bottom.margin = 16.dp
-            }
-        }) {
-            val uri = story.uri
-            if (uri is Some) {
-                Favicon(uri.t)
-                Source(uri.t)
-                Box(modifier = Modifier.height(64.dp)) {
-                    Preview(uri.t)
-                }
-            }
-            Title(story.title)
-            Subtitle(story.authorId, story.createdAt, story.descendantCount)
-        }
-    }
-}
-
-@Composable
-fun StoryRow(story: Story) {
+fun StoryRow(story: Item.Story) {
     val navigator = NavigatorAmbient.current
     val navigateToDetails = {
         val route = Routes.itemDetail(story.id)
@@ -172,7 +96,7 @@ fun StoryRow(story: Story) {
                 }
                 Title(story.title)
                 Spacer(modifier = Modifier.size(4.dp))
-                Subtitle(story.authorId, story.createdAt, story.descendantCount)
+                Subtitle(story.authorId, story.createdAt)
             }
             if (uri is Some) {
                 Spacer(modifier = Modifier.size(8.dp))
@@ -216,10 +140,9 @@ fun Title(title: String) {
 }
 
 @Composable
-fun Subtitle(author: UserId, createdAt: UnixTime, commentCount: Long) {
+fun Subtitle(author: UserId, createdAt: UnixTime) {
     Text(
-        "$commentCount comments · ${author.value} · ${createdAt.timeAgo}",
-        modifier = Modifier.tag("subtitle"),
+        "${createdAt.timeAgo} by ${author.value}",
         style = MaterialTheme.typography.caption
     )
 }
@@ -257,7 +180,7 @@ fun Preview(uri: Uri, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun Job(job: Job) {
+fun Job(job: Item.Job) {
     val context = ContextAmbient.current
     val openChromeCustomTab = {
         val uri = job.uri.orNull()
@@ -289,12 +212,12 @@ fun Job(job: Job) {
 }
 
 @Composable
-fun Ask(ask: Ask) {
+fun Ask(ask: Item.Ask) {
     Text(ask.title, modifier = Modifier.preferredHeight(48.dp))
 }
 
 @Composable
-fun Poll(poll: Poll) {
+fun Poll(poll: Item.Poll) {
     Text(poll.title, modifier = Modifier.preferredHeight(48.dp))
 }
 
@@ -302,7 +225,7 @@ fun Poll(poll: Poll) {
 @Composable
 fun StoryPreview() {
     StoryRow(
-        Story(
+        Item.Story(
             ItemId(0),
             UserId("pardom"),
             UnixTime(System.currentTimeMillis() - DateUtils.MINUTE_IN_MILLIS * 23),

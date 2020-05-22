@@ -1,16 +1,14 @@
 package news.lambda.app.component
 
 import arrow.core.Either
-import arrow.core.None
-import arrow.core.Option
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.map
-import max.Uri
 import news.lambda.data.service.item.GetItemById
 import news.lambda.model.Item
 import news.lambda.model.ItemId
 import news.lambda.model.RemoteData
-import news.lambda.model.RemoteData.*
+import news.lambda.model.RemoteData.Loading
+import news.lambda.model.RemoteData.NotAsked
 import news.lambda.model.toRemoteData
 import news.lambda.util.msgEffect
 import oolong.*
@@ -43,47 +41,33 @@ object ItemDetailComponent {
     }
 
     data class Props(
-        val header: Header,
-        val body: Body
+        val item: RemoteData<Throwable, Item>,
+        val rows: Set<Row>
     ) {
 
-        data class Header(
-            val title: String,
-            val uri: Option<Uri>
-        )
+        sealed class Row {
 
-        sealed class Body {
+            abstract val depth: Int
 
-            object Loading : Body()
+            data class Id(
+                override val depth: Int,
+                val load: (Dispatch<Msg>) -> Unit
+            ) : Row()
+
+            data class Loading(
+                override val depth: Int,
+                val itemId: ItemId
+            ) : Row()
+
+            data class Failure(
+                override val depth: Int,
+                val load: ItemId
+            ) : Row()
 
             data class Loaded(
-                val rows: List<Row>
-            ) : Body()
-
-            sealed class Row {
-
-                abstract val depth: Int
-
-                data class Id(
-                    override val depth: Int,
-                    val load: (Dispatch<Msg>) -> Unit
-                ) : Row()
-
-                data class Loading(
-                    override val depth: Int,
-                    val itemId: ItemId
-                ) : Row()
-
-                data class Failure(
-                    override val depth: Int,
-                    val load: ItemId
-                ) : Row()
-
-                data class Loaded(
-                    override val depth: Int,
-                    val item: Item
-                ) : Row()
-            }
+                override val depth: Int,
+                val item: Item
+            ) : Row()
         }
     }
 
@@ -110,24 +94,13 @@ object ItemDetailComponent {
             }
         }
 
-    val view: View<Model, Props> = { model ->
-        val parentItem = (model.items.getValue(model.itemId) as? Success)?.data
-        val title = (parentItem as? Item.WithTitle)?.title ?: ""
-        val uri = (parentItem as? Item.WithUri)?.uri ?: None
-        Props(
-            Props.Header(
-                title,
-                uri
-            ),
-            if (parentItem != null) {
-                Props.Body.Loaded(
-                    emptyList()
-                )
-            } else {
-                Props.Body.Loading
-            }
-        )
-    }
+    val view: View<Model, Props> =
+        { model ->
+            Props(
+                model.items.getValue(model.itemId),
+                emptySet()
+            )
+        }
 
     // Updates
 

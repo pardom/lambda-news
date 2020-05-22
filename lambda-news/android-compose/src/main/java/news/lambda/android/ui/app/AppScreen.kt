@@ -7,8 +7,8 @@ import androidx.compose.staticAmbientOf
 import androidx.ui.material.MaterialTheme
 import max.Navigator
 import news.lambda.android.ui.LightColors
-import news.lambda.android.ui.item.ItemDetailScreen
-import news.lambda.android.ui.item.ItemListScreen
+import news.lambda.android.ui.item.detail.ItemDetailScreen
+import news.lambda.android.ui.item.list.ItemListScreen
 import news.lambda.android.ui.user.UserDetailScreen
 import news.lambda.app.component.AppComponent.Msg
 import news.lambda.app.component.AppComponent.Props

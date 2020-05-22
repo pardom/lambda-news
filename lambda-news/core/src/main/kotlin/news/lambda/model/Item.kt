@@ -1,6 +1,8 @@
 package news.lambda.model
 
+import arrow.core.None
 import arrow.core.Option
+import arrow.core.toOption
 import max.Uri
 
 sealed class Item {
@@ -33,9 +35,27 @@ sealed class Item {
         val uri: Option<Uri>
     }
 
-    interface WithDescendants {
+    interface WithDescendantCount {
         val descendantCount: Long
     }
+
+    val titleOption: Option<String>
+        get() = (this as? WithTitle)?.title.toOption()
+
+    val textOption: Option<String>
+        get() = (this as? WithText)?.text ?: None
+
+    val childIdsOption: Option<Set<ItemId>>
+        get() = (this as? WithChildIds)?.childIds.toOption()
+
+    val scoreOption: Option<Long>
+        get() = (this as? WithScore)?.score.toOption()
+
+    val uriOption: Option<Uri>
+        get() = (this as? WithUri)?.uri ?: None
+
+    val descendantCountOption: Option<Long>
+        get() = (this as? WithDescendantCount)?.descendantCount.toOption()
 
     data class Story(
         override val id: ItemId,
@@ -47,7 +67,7 @@ sealed class Item {
         override val title: String,
         override val text: Option<String>,
         override val uri: Option<Uri>
-    ) : Item(), WithChildIds, WithDescendants, WithScore, WithTitle, WithText, WithUri
+    ) : Item(), WithChildIds, WithDescendantCount, WithScore, WithTitle, WithText, WithUri
 
     data class Comment(
         override val id: ItemId,
@@ -77,7 +97,7 @@ sealed class Item {
         override val title: String,
         override val text: Option<String>,
         override val uri: Option<Uri>
-    ) : Item(), WithChildIds, WithDescendants, WithScore, WithTitle, WithText, WithUri
+    ) : Item(), WithChildIds, WithDescendantCount, WithScore, WithTitle, WithText, WithUri
 
     data class Poll(
         override val id: ItemId,
@@ -89,7 +109,7 @@ sealed class Item {
         override val title: String,
         override val text: Option<String>,
         val pollOptionIds: Set<ItemId>
-    ) : Item(), WithChildIds, WithDescendants, WithScore, WithTitle, WithText
+    ) : Item(), WithChildIds, WithDescendantCount, WithScore, WithTitle, WithText
 
     data class PollOption(
         override val id: ItemId,

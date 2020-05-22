@@ -1,4 +1,4 @@
-package news.lambda.android.ui.item
+package news.lambda.android.ui.item.list
 
 import androidx.compose.Composable
 import androidx.ui.core.Modifier
@@ -11,6 +11,8 @@ import androidx.ui.layout.padding
 import androidx.ui.material.*
 import androidx.ui.text.style.TextAlign
 import androidx.ui.unit.dp
+import news.lambda.android.ui.item.Item
+import news.lambda.android.ui.item.Loading
 import news.lambda.app.component.ItemListComponent.Msg
 import news.lambda.app.component.ItemListComponent.Props
 import oolong.Dispatch
@@ -18,8 +20,18 @@ import oolong.Dispatch
 @Composable
 fun ItemListScreen(props: Props, dispatch: Dispatch<Msg>) {
     Scaffold(
-        topAppBar = { Header(props.header, dispatch) },
-        bodyContent = { Body(props.body, dispatch) }
+        topAppBar = {
+            Header(
+                props.header,
+                dispatch
+            )
+        },
+        bodyContent = {
+            Body(
+                props.body,
+                dispatch
+            )
+        }
     )
 }
 
@@ -57,7 +69,10 @@ fun Header(header: Props.Header, dispatch: Dispatch<Msg>) {
 fun Body(body: Props.Body, dispatch: Dispatch<Msg>) {
     when (body) {
         Props.Body.Loading -> TODO()
-        is Props.Body.Loaded -> ItemList(body.rows, dispatch)
+        is Props.Body.Loaded -> ItemList(
+            body.rows,
+            dispatch
+        )
     }
 }
 
@@ -67,7 +82,10 @@ fun ItemList(rows: List<Props.Body.Row>, dispatch: Dispatch<Msg>) {
     if (rows.isEmpty()) return
     AdapterList(rows) { row ->
         when (row) {
-            is Props.Body.Row.Id -> Id(row, dispatch)
+            is Props.Body.Row.Id -> Id(
+                row,
+                dispatch
+            )
             is Props.Body.Row.Loading -> Loading()
             is Props.Body.Row.Loaded -> Item(row.item)
         }
