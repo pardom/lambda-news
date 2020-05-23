@@ -5,7 +5,10 @@ import arrow.core.Either.Left
 import arrow.core.Either.Right
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.map
-import news.lambda.app.component.ItemListComponent.Msg.*
+import news.lambda.app.component.ItemListComponent.Msg.CategorySelected
+import news.lambda.app.component.ItemListComponent.Msg.ItemRequested
+import news.lambda.app.component.ItemListComponent.Msg.SetCategoryItemIds
+import news.lambda.app.component.ItemListComponent.Msg.SetItem
 import news.lambda.data.service.item.GetItemById
 import news.lambda.data.service.item.GetItemIdsByCategory
 import news.lambda.model.Item
@@ -13,10 +16,19 @@ import news.lambda.model.Item.Category
 import news.lambda.model.Item.Category.JOB
 import news.lambda.model.ItemId
 import news.lambda.model.RemoteData
-import news.lambda.model.RemoteData.*
+import news.lambda.model.RemoteData.Failure
+import news.lambda.model.RemoteData.Loading
+import news.lambda.model.RemoteData.NotAsked
+import news.lambda.model.RemoteData.Success
 import news.lambda.model.toRemoteData
 import news.lambda.util.msgEffect
-import oolong.*
+import oolong.Dispatch
+import oolong.Effect
+import oolong.Init
+import oolong.Next
+import oolong.Update
+import oolong.View
+import oolong.effect
 import oolong.effect.none
 
 object ItemListComponent {
@@ -213,14 +225,15 @@ object ItemListComponent {
                 .map { itemId -> viewRow(itemId, model.items.getOrElse(itemId) { NotAsked }) }
         }
 
-    val viewRow: (ItemId, RemoteData<Throwable, Item>) -> Props.Body.Row = { itemId, item ->
-        when (item) {
-            NotAsked -> Props.Body.Row.Id { dispatch -> dispatch(ItemRequested(itemId)) }
-            Loading -> Props.Body.Row.Loading(itemId)
-            is Success -> Props.Body.Row.Loaded(item.data)
-            is Failure -> Props.Body.Row.Failure(itemId)
+    val viewRow: (ItemId, RemoteData<Throwable, Item>) -> Props.Body.Row =
+        { itemId, item ->
+            when (item) {
+                NotAsked -> Props.Body.Row.Id { dispatch -> dispatch(ItemRequested(itemId)) }
+                Loading -> Props.Body.Row.Loading(itemId)
+                is Success -> Props.Body.Row.Loaded(item.data)
+                is Failure -> Props.Body.Row.Failure(itemId)
+            }
         }
-    }
 
     // Effects
 

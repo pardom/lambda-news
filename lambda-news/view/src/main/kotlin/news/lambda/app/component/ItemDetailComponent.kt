@@ -1,6 +1,7 @@
 package news.lambda.app.component
 
 import arrow.core.Either
+import arrow.core.getOrElse
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.map
 import news.lambda.data.service.item.GetItemById
@@ -11,7 +12,13 @@ import news.lambda.model.RemoteData.Loading
 import news.lambda.model.RemoteData.NotAsked
 import news.lambda.model.toRemoteData
 import news.lambda.util.msgEffect
-import oolong.*
+import oolong.Dispatch
+import oolong.Effect
+import oolong.Init
+import oolong.Next
+import oolong.Update
+import oolong.View
+import oolong.effect
 import oolong.effect.none
 
 object ItemDetailComponent {
@@ -51,6 +58,7 @@ object ItemDetailComponent {
 
             data class Id(
                 override val depth: Int,
+                val itemId: ItemId,
                 val load: (Dispatch<Msg>) -> Unit
             ) : Row()
 
@@ -61,7 +69,7 @@ object ItemDetailComponent {
 
             data class Failure(
                 override val depth: Int,
-                val load: ItemId
+                val itemId: ItemId
             ) : Row()
 
             data class Loaded(
@@ -98,7 +106,7 @@ object ItemDetailComponent {
         { model ->
             Props(
                 model.items.getValue(model.itemId),
-                emptySet()
+                viewRows(model)
             )
         }
 
@@ -118,9 +126,76 @@ object ItemDetailComponent {
 
     private val updateSetItem: (Msg.SetItem, Model) -> Next<Model, Msg> =
         { msg, model ->
+            val items = when (val item = msg.item.toRemoteData()) {
+                is RemoteData.Success -> listOf(msg.itemId to item) +
+                        item.data.childIdsOption
+                            .map { childIds ->
+                                childIds.map { childId ->
+                                    childId to model.items.getOrElse(childId) { NotAsked }
+                                }
+                            }
+                            .getOrElse { emptySet<Pair<ItemId, RemoteData<Throwable, Item>>>() }
+                else -> listOf(msg.itemId to item)
+            }
             model.copy(
-                items = model.items + listOf(msg.itemId to msg.item.toRemoteData())
+                items = model.items + items
             ) to none()
+        }
+
+    // Views
+
+    private val viewRows: (Model) -> Set<Props.Row> =
+        { model ->
+            when (val item = model.items[model.itemId]) {
+                is RemoteData.Success -> {
+                    item.data
+                        .childIdsOption
+                        .map { itemIds ->
+                            itemIds.flatMap { itemId ->
+                                viewRows(0, itemId, model.items)
+                            }.toSet()
+                        }
+                        .getOrElse { emptySet() }
+                }
+                else -> emptySet()
+            }
+        }
+
+    private fun viewRows(
+        depth: Int,
+        itemId: ItemId,
+        items: Map<ItemId, RemoteData<Throwable, Item>>
+    ): Set<Props.Row> {
+        return when (val item = items[itemId]) {
+            is RemoteData.Success -> {
+                setOf(viewRow(depth, itemId, item)) + item.data
+                    .childIdsOption
+                    .map { itemIds ->
+                        itemIds.flatMap { itemId ->
+                            viewRows(depth + 1, itemId, items)
+                        }.toSet()
+                    }
+                    .getOrElse { emptySet() }
+            }
+            null -> emptySet()
+            else -> setOf(viewRow(depth, itemId, item))
+        }
+    }
+
+    private val viewRow: (Int, ItemId, RemoteData<Throwable, Item>) -> Props.Row =
+        { depth, itemId, item ->
+            when (item) {
+                NotAsked -> Props.Row.Id(depth, itemId) { dispatch ->
+                    dispatch(
+                        Msg.ItemRequested(
+                            itemId
+                        )
+                    )
+                }
+                Loading -> Props.Row.Loading(depth, itemId)
+                is RemoteData.Failure -> Props.Row.Failure(depth, itemId)
+                is RemoteData.Success -> Props.Row.Loaded(depth, item.data)
+            }
         }
 
     // Effects

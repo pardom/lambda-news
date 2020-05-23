@@ -4,11 +4,17 @@ import android.text.format.DateUtils
 import androidx.compose.Composable
 import androidx.ui.core.Modifier
 import androidx.ui.foundation.AdapterList
+import androidx.ui.foundation.Box
 import androidx.ui.foundation.Text
+import androidx.ui.graphics.Color
 import androidx.ui.layout.Column
+import androidx.ui.layout.Row
 import androidx.ui.layout.Spacer
+import androidx.ui.layout.fillMaxHeight
 import androidx.ui.layout.padding
 import androidx.ui.layout.size
+import androidx.ui.layout.width
+import androidx.ui.material.Divider
 import androidx.ui.material.MaterialTheme
 import androidx.ui.material.Scaffold
 import androidx.ui.tooling.preview.Preview
@@ -22,32 +28,47 @@ import news.lambda.app.component.ItemDetailComponent.Msg
 import news.lambda.app.component.ItemDetailComponent.Props
 import news.lambda.model.Item
 import news.lambda.model.ItemId
+import news.lambda.model.RemoteData
 import news.lambda.model.RemoteData.Success
 import news.lambda.model.UnixTime
 import news.lambda.model.UserId
 import oolong.Dispatch
 
+sealed class AdapterType {
+    data class Header(val item: RemoteData<Throwable, Item>) : AdapterType()
+    data class Row(val row: Props.Row) : AdapterType()
+}
+
 @Composable
 fun ItemDetailScreen(props: Props, dispatch: Dispatch<Msg>) {
     Scaffold(
         bodyContent = {
-            val itemOption = props.item
-            if (itemOption is Success) {
-                val item = itemOption.data
-                Column {
-                    Preview(item.uriOption)
-                    Spacer(modifier = Modifier.size(16.dp))
-                    Title(item.titleOption)
-                    Spacer(modifier = Modifier.size(4.dp))
-                    Subtitle(item.authorId, item.createdAt)
-                    Spacer(modifier = Modifier.size(16.dp))
-                    Text(item.textOption)
-                    Spacer(modifier = Modifier.size(16.dp))
-                    Rows(props.rows)
+            val data = listOf(AdapterType.Header(props.item)) + props.rows.map(AdapterType::Row)
+            AdapterList(data) { item ->
+                when (item) {
+                    is AdapterType.Header -> Header(item.item)
+                    is AdapterType.Row -> Row(item.row, dispatch)
                 }
             }
         }
     )
+}
+
+@Composable
+fun Header(item: RemoteData<Throwable, Item>) {
+    if (item is Success) {
+        val item = item.data
+        Column {
+            Preview(item.uriOption)
+            Spacer(modifier = Modifier.size(16.dp))
+            Title(item.titleOption)
+            Spacer(modifier = Modifier.size(4.dp))
+            Subtitle(item.authorId, item.createdAt)
+            Spacer(modifier = Modifier.size(16.dp))
+            Text(item.textOption)
+            Spacer(modifier = Modifier.size(16.dp))
+        }
+    }
 }
 
 @Composable
@@ -89,15 +110,39 @@ fun Text(text: Option<String>) {
 }
 
 @Composable
-fun Rows(rows: Set<Props.Row>) {
-    AdapterList(data = rows.toList()) { row ->
-        Row(row)
+fun Row(row: Props.Row, dispatch: Dispatch<Msg>) {
+    Row(
+        modifier = Modifier.padding(vertical = 8.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .width((row.depth * 8).dp)
+                .fillMaxHeight(),
+            backgroundColor = Color(0xFFEAEAEA)
+        ) {
+
+        }
+        when (row) {
+            is Props.Row.Id -> {
+                row.load(dispatch)
+                Text("${row.itemId}")
+            }
+            is Props.Row.Loading -> Text("${row.itemId}")
+            is Props.Row.Failure -> Text("${row.itemId}")
+            is Props.Row.Loaded -> ItemRow(row)
+        }
     }
+    Divider(color = Color(0xFFEAEAEA))
 }
 
 @Composable
-fun Row(row: Props.Row) {
-
+fun ItemRow(row: Props.Row.Loaded) {
+    val item = row.item
+    Column {
+        Subtitle(item.authorId, item.createdAt)
+        Spacer(modifier = Modifier.size(4.dp))
+        Text(item.textOption)
+    }
 }
 
 @Preview

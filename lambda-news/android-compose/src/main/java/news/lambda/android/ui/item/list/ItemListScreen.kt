@@ -165,7 +165,7 @@ fun ItemRow(item: Item) {
             }
             if (uri is Some) {
                 Spacer(modifier = Modifier.size(8.dp))
-                RoundedPreview(uri.t, Modifier.height(64.dp), 4F / 3F)
+                RoundedPreview(uri.t, Modifier.height(64.dp), 1F)
             }
         }
     }
