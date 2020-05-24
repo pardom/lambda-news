@@ -120,4 +120,10 @@ sealed class Item {
         val pollId: ItemId
     ) : Item(), WithScore, WithText
 
+    data class Deleted(
+        override val id: ItemId,
+        override val authorId: UserId = UserId(""),
+        override val createdAt: UnixTime = UnixTime(0)
+    ) : Item()
+
 }

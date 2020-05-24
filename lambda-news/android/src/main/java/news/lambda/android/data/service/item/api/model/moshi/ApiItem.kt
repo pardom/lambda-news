@@ -11,7 +11,7 @@ data class ApiItem(
     val id: Long,
     val deleted: Boolean?,
     val type: Type,
-    val by: String,
+    val by: String?,
     val time: Long,
     val text: String?,
     val dead: Boolean?,
@@ -29,17 +29,20 @@ data class ApiItem(
         job, story, comment, poll, pollopt
     }
 
-    fun toItem(): Item = when (type) {
-        Type.job -> toJob()
-        Type.story -> toStory()
-        Type.comment -> toComment()
-        Type.poll -> toPoll()
-        Type.pollopt -> toPollOpt()
+    fun toItem(): Item {
+        if (deleted == true) return Item.Deleted(ItemId(id))
+        return when (type) {
+            Type.job -> toJob()
+            Type.story -> toStory()
+            Type.comment -> toComment()
+            Type.poll -> toPoll()
+            Type.pollopt -> toPollOpt()
+        }
     }
 
     private fun toJob() = Item.Job(
         ItemId(id),
-        UserId(by),
+        UserId(requireNotNull(by)),
         UnixTime(time * 1000),
         requireNotNull(score),
         requireNotNull(title),
@@ -48,7 +51,7 @@ data class ApiItem(
 
     private fun toStory() = Item.Story(
         ItemId(id),
-        UserId(by),
+        UserId(requireNotNull(by)),
         UnixTime(time * 1000),
         kids.orEmpty().map(::ItemId).toSet(),
         requireNotNull(descendants),
@@ -60,7 +63,7 @@ data class ApiItem(
 
     private fun toComment() = Item.Comment(
         ItemId(id),
-        UserId(by),
+        UserId(requireNotNull(by)),
         UnixTime(time * 1000),
         kids.orEmpty().map(::ItemId).toSet(),
         requireNotNull(text).toOption(),
@@ -69,7 +72,7 @@ data class ApiItem(
 
     private fun toPoll() = Item.Poll(
         ItemId(id),
-        UserId(by),
+        UserId(requireNotNull(by)),
         UnixTime(time * 1000),
         kids.orEmpty().map(::ItemId).toSet(),
         requireNotNull(descendants),
@@ -81,7 +84,7 @@ data class ApiItem(
 
     private fun toPollOpt() = Item.PollOption(
         ItemId(id),
-        UserId(by),
+        UserId(requireNotNull(by)),
         UnixTime(time * 1000),
         requireNotNull(score),
         requireNotNull(text).toOption(),

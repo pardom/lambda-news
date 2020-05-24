@@ -11,9 +11,11 @@ import androidx.ui.graphics.Color
 import androidx.ui.graphics.painter.Stroke
 import androidx.ui.layout.Column
 import androidx.ui.layout.Spacer
+import androidx.ui.layout.fillMaxWidth
 import androidx.ui.layout.height
 import androidx.ui.layout.padding
 import androidx.ui.layout.size
+import androidx.ui.material.CircularProgressIndicator
 import androidx.ui.material.MaterialTheme
 import androidx.ui.material.Scaffold
 import androidx.ui.tooling.preview.Preview
@@ -25,6 +27,7 @@ import news.lambda.android.ui.item.Preview
 import news.lambda.android.util.timeAgo
 import news.lambda.app.component.ItemDetailComponent.Msg
 import news.lambda.app.component.ItemDetailComponent.Props
+import news.lambda.model.ItemId
 import news.lambda.model.UnixTime
 import news.lambda.model.UserId
 import oolong.Dispatch
@@ -111,12 +114,20 @@ fun Row(row: Props.Row, dispatch: Dispatch<Msg>) {
     when (row) {
         is Props.Row.Id -> {
             row.load(dispatch)
-            Text("${row.itemId}")
+            ItemLoading()
         }
-        is Props.Row.Loading -> Text("${row.itemId}")
-        is Props.Row.Failure -> Text("${row.itemId}")
+        is Props.Row.Loading -> ItemLoading()
         is Props.Row.Loaded -> ItemRow(row)
     }
+}
+
+@Composable
+fun ItemLoading() {
+    CircularProgressIndicator(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+    )
 }
 
 @Composable
@@ -174,7 +185,8 @@ fun ItemDetailScreenPreview() {
                     UserId("pardom"),
                     UnixTime(System.currentTimeMillis() - DateUtils.MINUTE_IN_MILLIS * 5),
                     Some("Transporters reproduce with modification! Strange, ordinary parasites mechanically transform a colorful, remarkable alien. Starships yell with nuclear flux!")
-                )
+                ),
+                Props.Row.Loading(1, ItemId(2))
             )
         ),
         {}
