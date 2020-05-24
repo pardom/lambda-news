@@ -64,7 +64,7 @@ data class ApiItem(
         UnixTime(time * 1000),
         kids.orEmpty().map(::ItemId).toSet(),
         requireNotNull(text).toOption(),
-        requireNotNull(parent)
+        ItemId(requireNotNull(parent))
     )
 
     private fun toPoll() = Item.Poll(

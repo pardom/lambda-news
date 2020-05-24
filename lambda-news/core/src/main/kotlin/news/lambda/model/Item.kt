@@ -75,7 +75,7 @@ sealed class Item {
         override val createdAt: UnixTime,
         override val childIds: Set<ItemId>,
         override val text: Option<String>,
-        val parentId: Long
+        val parentId: ItemId
     ) : Item(), WithChildIds, WithText
 
     data class Job(

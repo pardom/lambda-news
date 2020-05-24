@@ -3,18 +3,17 @@ package news.lambda.android.ui.item.detail
 import android.text.format.DateUtils
 import androidx.compose.Composable
 import androidx.ui.core.Modifier
+import androidx.ui.core.drawBehind
 import androidx.ui.foundation.AdapterList
-import androidx.ui.foundation.Box
 import androidx.ui.foundation.Text
+import androidx.ui.geometry.Offset
 import androidx.ui.graphics.Color
+import androidx.ui.graphics.painter.Stroke
 import androidx.ui.layout.Column
-import androidx.ui.layout.Row
 import androidx.ui.layout.Spacer
-import androidx.ui.layout.fillMaxHeight
+import androidx.ui.layout.height
 import androidx.ui.layout.padding
 import androidx.ui.layout.size
-import androidx.ui.layout.width
-import androidx.ui.material.Divider
 import androidx.ui.material.MaterialTheme
 import androidx.ui.material.Scaffold
 import androidx.ui.tooling.preview.Preview
@@ -26,16 +25,12 @@ import news.lambda.android.ui.item.Preview
 import news.lambda.android.util.timeAgo
 import news.lambda.app.component.ItemDetailComponent.Msg
 import news.lambda.app.component.ItemDetailComponent.Props
-import news.lambda.model.Item
-import news.lambda.model.ItemId
-import news.lambda.model.RemoteData
-import news.lambda.model.RemoteData.Success
 import news.lambda.model.UnixTime
 import news.lambda.model.UserId
 import oolong.Dispatch
 
 sealed class AdapterType {
-    data class Header(val item: RemoteData<Throwable, Item>) : AdapterType()
+    data class Header(val header: Props.Header) : AdapterType()
     data class Row(val row: Props.Row) : AdapterType()
 }
 
@@ -43,31 +38,33 @@ sealed class AdapterType {
 fun ItemDetailScreen(props: Props, dispatch: Dispatch<Msg>) {
     Scaffold(
         bodyContent = {
-            val data = listOf(AdapterType.Header(props.item)) + props.rows.map(AdapterType::Row)
+            val header = when (val propsHeader = props.header) {
+                is Some -> listOf(AdapterType.Header(propsHeader.t))
+                else -> emptyList()
+            }
+            val data = header + props.rows.map(AdapterType::Row)
             AdapterList(data) { item ->
                 when (item) {
-                    is AdapterType.Header -> Header(item.item)
+                    is AdapterType.Header -> Header(item.header, dispatch)
                     is AdapterType.Row -> Row(item.row, dispatch)
                 }
             }
+            Spacer(modifier = Modifier.height(8.dp))
         }
     )
 }
 
 @Composable
-fun Header(item: RemoteData<Throwable, Item>) {
-    if (item is Success) {
-        val item = item.data
-        Column {
-            Preview(item.uriOption)
-            Spacer(modifier = Modifier.size(16.dp))
-            Title(item.titleOption)
-            Spacer(modifier = Modifier.size(4.dp))
-            Subtitle(item.authorId, item.createdAt)
-            Spacer(modifier = Modifier.size(16.dp))
-            Text(item.textOption)
-            Spacer(modifier = Modifier.size(16.dp))
-        }
+fun Header(header: Props.Header, dispatch: Dispatch<Msg>) {
+    Column {
+        Preview(header.uri)
+        Spacer(modifier = Modifier.size(16.dp))
+        Title(header.title)
+        Spacer(modifier = Modifier.size(4.dp))
+        Subtitle(header.authorId, header.createdAt)
+        Spacer(modifier = Modifier.size(16.dp))
+        Text(header.text)
+        Spacer(modifier = Modifier.size(16.dp))
     }
 }
 
@@ -111,37 +108,43 @@ fun Text(text: Option<String>) {
 
 @Composable
 fun Row(row: Props.Row, dispatch: Dispatch<Msg>) {
-    Row(
-        modifier = Modifier.padding(vertical = 8.dp)
-    ) {
-        Box(
-            modifier = Modifier
-                .width((row.depth * 8).dp)
-                .fillMaxHeight(),
-            backgroundColor = Color(0xFFEAEAEA)
-        ) {
-
+    when (row) {
+        is Props.Row.Id -> {
+            row.load(dispatch)
+            Text("${row.itemId}")
         }
-        when (row) {
-            is Props.Row.Id -> {
-                row.load(dispatch)
-                Text("${row.itemId}")
-            }
-            is Props.Row.Loading -> Text("${row.itemId}")
-            is Props.Row.Failure -> Text("${row.itemId}")
-            is Props.Row.Loaded -> ItemRow(row)
-        }
+        is Props.Row.Loading -> Text("${row.itemId}")
+        is Props.Row.Failure -> Text("${row.itemId}")
+        is Props.Row.Loaded -> ItemRow(row)
     }
-    Divider(color = Color(0xFFEAEAEA))
 }
 
 @Composable
 fun ItemRow(row: Props.Row.Loaded) {
-    val item = row.item
-    Column {
-        Subtitle(item.authorId, item.createdAt)
+    val color = Color(127, 127, 127, 0xFF)
+    val insetWidth = 16
+    val gutterWidth = (row.depth * insetWidth).dp
+    Column(
+        modifier = Modifier
+            .drawBehind {
+                for (i in 0..row.depth) {
+                    val strokeWidth = 2 * density
+                    val x = i * insetWidth * density - strokeWidth / 2
+                    drawLine(
+                        color,
+                        Offset(x, 0F),
+                        Offset(x, size.height),
+                        Stroke(strokeWidth)
+                    )
+                }
+            }
+            .padding(start = gutterWidth)
+    ) {
+        Spacer(Modifier.height(8.dp))
+        Subtitle(row.authorId, row.createdAt)
         Spacer(modifier = Modifier.size(4.dp))
-        Text(item.textOption)
+        Text(row.text)
+        Spacer(Modifier.height(8.dp))
     }
 }
 
@@ -150,20 +153,29 @@ fun ItemRow(row: Props.Row.Loaded) {
 fun ItemDetailScreenPreview() {
     ItemDetailScreen(
         Props(
-            Success(
-                Item.Story(
-                    ItemId(0),
+            Some(
+                Props.Header(
                     UserId("pardom"),
                     UnixTime(System.currentTimeMillis() - DateUtils.MINUTE_IN_MILLIS * 23),
-                    emptySet(),
-                    42,
-                    182,
-                    "Michael Pardo's Personal Website with Links to Github, LinkedIn, and Resume",
+                    Some("Michael Pardo's Personal Website with Links to Github, LinkedIn, and Resume"),
                     Some("Where is the unrelated ship? The mermaid is cunningly most unusual. Ellipse, starlight travel, and coordinates. Intelligent teleporters, to the radiation dome. Starships view with rumour at the modern radiation dome!"),
                     Some(Uri.parse("https://michaelpardo.com"))
                 )
             ),
-            emptySet()
+            setOf(
+                Props.Row.Loaded(
+                    0,
+                    UserId("pg"),
+                    UnixTime(System.currentTimeMillis() - DateUtils.MINUTE_IN_MILLIS * 8),
+                    Some("This turbulence has only been examined by a huge girl. Bravely gather a transporter.")
+                ),
+                Props.Row.Loaded(
+                    1,
+                    UserId("pardom"),
+                    UnixTime(System.currentTimeMillis() - DateUtils.MINUTE_IN_MILLIS * 5),
+                    Some("Transporters reproduce with modification! Strange, ordinary parasites mechanically transform a colorful, remarkable alien. Starships yell with nuclear flux!")
+                )
+            )
         ),
         {}
     )

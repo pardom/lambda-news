@@ -1,15 +1,21 @@
 package news.lambda.app.component
 
 import arrow.core.Either
+import arrow.core.None
+import arrow.core.Option
+import arrow.core.Some
 import arrow.core.getOrElse
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.map
+import max.Uri
 import news.lambda.data.service.item.GetItemById
 import news.lambda.model.Item
 import news.lambda.model.ItemId
 import news.lambda.model.RemoteData
 import news.lambda.model.RemoteData.Loading
 import news.lambda.model.RemoteData.NotAsked
+import news.lambda.model.UnixTime
+import news.lambda.model.UserId
 import news.lambda.model.toRemoteData
 import news.lambda.util.msgEffect
 import oolong.Dispatch
@@ -48,9 +54,17 @@ object ItemDetailComponent {
     }
 
     data class Props(
-        val item: RemoteData<Throwable, Item>,
+        val header: Option<Header>,
         val rows: Set<Row>
     ) {
+
+        data class Header(
+            val authorId: UserId,
+            val createdAt: UnixTime,
+            val title: Option<String>,
+            val text: Option<String>,
+            val uri: Option<Uri>
+        )
 
         sealed class Row {
 
@@ -74,7 +88,9 @@ object ItemDetailComponent {
 
             data class Loaded(
                 override val depth: Int,
-                val item: Item
+                val authorId: UserId,
+                val createdAt: UnixTime,
+                val text: Option<String>
             ) : Row()
         }
     }
@@ -105,7 +121,7 @@ object ItemDetailComponent {
     val view: View<Model, Props> =
         { model ->
             Props(
-                model.items.getValue(model.itemId),
+                viewHeader(model),
                 viewRows(model)
             )
         }
@@ -143,6 +159,22 @@ object ItemDetailComponent {
         }
 
     // Views
+
+    private val viewHeader: (Model) -> Option<Props.Header> =
+        { model ->
+            when (val item = model.items.getValue(model.itemId)) {
+                is RemoteData.Success -> Some(
+                    Props.Header(
+                        item.data.authorId,
+                        item.data.createdAt,
+                        item.data.titleOption,
+                        item.data.textOption,
+                        item.data.uriOption
+                    )
+                )
+                else -> None
+            }
+        }
 
     private val viewRows: (Model) -> Set<Props.Row> =
         { model ->
@@ -194,7 +226,12 @@ object ItemDetailComponent {
                 }
                 Loading -> Props.Row.Loading(depth, itemId)
                 is RemoteData.Failure -> Props.Row.Failure(depth, itemId)
-                is RemoteData.Success -> Props.Row.Loaded(depth, item.data)
+                is RemoteData.Success -> Props.Row.Loaded(
+                    depth,
+                    item.data.authorId,
+                    item.data.createdAt,
+                    item.data.textOption
+                )
             }
         }
 
