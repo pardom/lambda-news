@@ -1,5 +1,6 @@
 package news.lambda.android.ui.item.detail
 
+import android.text.Html
 import android.text.format.DateUtils
 import androidx.compose.Composable
 import androidx.ui.core.Modifier
@@ -101,11 +102,9 @@ fun Subtitle(author: UserId, createdAt: UnixTime) {
 @Composable
 fun Text(text: Option<String>) {
     if (text is Some) {
-        Text(
-            // TODO: Compose doesn't have anything like Html.fromHtml() that produces an AnnotatedString
-            text.t,
-            modifier = Modifier.padding(horizontal = 16.dp)
-        )
+        // TODO: Compose doesn't have anything like Html.fromHtml() that produces an AnnotatedString
+        val html = Html.fromHtml(text.t).toString()
+        Text(html, modifier = Modifier.padding(horizontal = 16.dp))
     }
 }
 
