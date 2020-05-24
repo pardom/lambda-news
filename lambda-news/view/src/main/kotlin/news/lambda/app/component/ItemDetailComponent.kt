@@ -33,7 +33,8 @@ object ItemDetailComponent {
 
     data class Model(
         val itemId: ItemId,
-        val items: Map<ItemId, RemoteData<Throwable, Item>>
+        val items: Map<ItemId, RemoteData<Throwable, Item>>,
+        val collapsedItemIds: Set<ItemId>
     )
 
     sealed class Msg {
@@ -41,6 +42,14 @@ object ItemDetailComponent {
         // Events
 
         data class ItemRequested(
+            val itemId: ItemId
+        ) : Msg()
+
+        data class ItemCollapsed(
+            val itemId: ItemId
+        ) : Msg()
+
+        data class ItemExpanded(
             val itemId: ItemId
         ) : Msg()
 
@@ -90,7 +99,10 @@ object ItemDetailComponent {
                 override val depth: Int,
                 val authorId: UserId,
                 val createdAt: UnixTime,
-                val text: Option<String>
+                val text: Option<String>,
+                val collapsed: Boolean,
+                val collapse: (Dispatch<Msg>) -> Unit,
+                val expand: (Dispatch<Msg>) -> Unit
             ) : Row()
         }
     }
@@ -102,7 +114,8 @@ object ItemDetailComponent {
             {
                 Model(
                     itemId = itemId,
-                    items = mapOf(itemId to NotAsked)
+                    items = mapOf(itemId to NotAsked),
+                    collapsedItemIds = emptySet()
                 ) to msgEffect(Msg.ItemRequested(itemId))
             }
         }
@@ -113,6 +126,8 @@ object ItemDetailComponent {
             { msg, model ->
                 when (msg) {
                     is Msg.ItemRequested -> updateItemRequested(msg, model)
+                    is Msg.ItemCollapsed -> updateItemCollapsed(msg, model)
+                    is Msg.ItemExpanded -> updateItemExpanded(msg, model)
                     is Msg.SetItem -> updateSetItem(msg, model)
                 }
             }
@@ -138,6 +153,20 @@ object ItemDetailComponent {
                     items = model.items + (msg.itemId to Loading)
                 ) to effect
             }
+        }
+
+    private val updateItemCollapsed: (Msg.ItemCollapsed, Model) -> Next<Model, Msg> =
+        { msg, model ->
+            model.copy(
+                collapsedItemIds = model.collapsedItemIds + msg.itemId
+            ) to none()
+        }
+
+    private val updateItemExpanded: (Msg.ItemExpanded, Model) -> Next<Model, Msg> =
+        { msg, model ->
+            model.copy(
+                collapsedItemIds = model.collapsedItemIds - msg.itemId
+            ) to none()
         }
 
     private val updateSetItem: (Msg.SetItem, Model) -> Next<Model, Msg> =
@@ -184,7 +213,7 @@ object ItemDetailComponent {
                         .childIdsOption
                         .map { itemIds ->
                             itemIds.flatMap { itemId ->
-                                viewRows(0, itemId, model.items)
+                                viewRows(0, itemId, model)
                             }.toSet()
                         }
                         .getOrElse { emptySet() }
@@ -196,27 +225,33 @@ object ItemDetailComponent {
     private fun viewRows(
         depth: Int,
         itemId: ItemId,
-        items: Map<ItemId, RemoteData<Throwable, Item>>
+        model: Model
     ): Set<Props.Row> {
-        return when (val item = items[itemId]) {
+        return when (val item = model.items[itemId]) {
             is RemoteData.Success -> {
-                setOf(viewRow(depth, itemId, item)) + item.data
-                    .childIdsOption
-                    .map { itemIds ->
-                        itemIds.flatMap { itemId ->
-                            viewRows(depth + 1, itemId, items)
-                        }.toSet()
-                    }
-                    .getOrElse { emptySet() }
+                val collapsed = itemId in model.collapsedItemIds
+                val itemRow = viewRow(depth, itemId, model)
+                val childRows = if (collapsed) {
+                    emptySet()
+                } else {
+                    item.data.childIdsOption
+                        .map { itemIds ->
+                            itemIds.flatMap { itemId ->
+                                viewRows(depth + 1, itemId, model)
+                            }.toSet()
+                        }
+                        .getOrElse { emptySet() }
+                }
+                setOf(itemRow) + childRows
             }
             null -> emptySet()
-            else -> setOf(viewRow(depth, itemId, item))
+            else -> setOf(viewRow(depth, itemId, model))
         }
     }
 
-    private val viewRow: (Int, ItemId, RemoteData<Throwable, Item>) -> Props.Row =
-        { depth, itemId, item ->
-            when (item) {
+    private val viewRow: (Int, ItemId, Model) -> Props.Row =
+        { depth, itemId, model ->
+            when (val item = model.items.getValue(itemId)) {
                 NotAsked -> Props.Row.Id(depth, itemId) { dispatch ->
                     dispatch(
                         Msg.ItemRequested(
@@ -230,7 +265,10 @@ object ItemDetailComponent {
                     depth,
                     item.data.authorId,
                     item.data.createdAt,
-                    item.data.textOption
+                    item.data.textOption,
+                    item.data.id in model.collapsedItemIds,
+                    { dispatch -> dispatch(Msg.ItemCollapsed(itemId)) },
+                    { dispatch -> dispatch(Msg.ItemExpanded(itemId)) }
                 )
             }
         }

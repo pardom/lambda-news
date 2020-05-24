@@ -6,7 +6,9 @@ import androidx.compose.Composable
 import androidx.ui.core.Modifier
 import androidx.ui.core.drawBehind
 import androidx.ui.foundation.AdapterList
+import androidx.ui.foundation.Clickable
 import androidx.ui.foundation.Text
+import androidx.ui.foundation.drawBackground
 import androidx.ui.geometry.Offset
 import androidx.ui.graphics.Color
 import androidx.ui.graphics.painter.Stroke
@@ -17,8 +19,10 @@ import androidx.ui.layout.height
 import androidx.ui.layout.padding
 import androidx.ui.layout.size
 import androidx.ui.material.CircularProgressIndicator
+import androidx.ui.material.Divider
 import androidx.ui.material.MaterialTheme
 import androidx.ui.material.Scaffold
+import androidx.ui.material.ripple.ripple
 import androidx.ui.tooling.preview.Preview
 import androidx.ui.unit.dp
 import arrow.core.Option
@@ -47,13 +51,15 @@ fun ItemDetailScreen(props: Props, dispatch: Dispatch<Msg>) {
                 else -> emptyList()
             }
             val data = header + props.rows.map(AdapterType::Row)
-            AdapterList(data) { item ->
-                when (item) {
-                    is AdapterType.Header -> Header(item.header, dispatch)
-                    is AdapterType.Row -> Row(item.row, dispatch)
+            Column {
+                AdapterList(data) { item ->
+                    when (item) {
+                        is AdapterType.Header -> Header(item.header, dispatch)
+                        is AdapterType.Row -> Row(item.row, dispatch)
+                    }
                 }
+                Spacer(modifier = Modifier.height(8.dp))
             }
-            Spacer(modifier = Modifier.height(8.dp))
         }
     )
 }
@@ -116,7 +122,7 @@ fun Row(row: Props.Row, dispatch: Dispatch<Msg>) {
             ItemLoading()
         }
         is Props.Row.Loading -> ItemLoading()
-        is Props.Row.Loaded -> ItemRow(row)
+        is Props.Row.Loaded -> ItemRow(row, dispatch)
     }
 }
 
@@ -130,31 +136,47 @@ fun ItemLoading() {
 }
 
 @Composable
-fun ItemRow(row: Props.Row.Loaded) {
+fun ItemRow(row: Props.Row.Loaded, dispatch: Dispatch<Msg>) {
     val color = Color(127, 127, 127, 0xFF)
     val insetWidth = 16
     val gutterWidth = (row.depth * insetWidth).dp
-    Column(
-        modifier = Modifier
-            .drawBehind {
-                for (i in 0..row.depth) {
-                    val strokeWidth = 2 * density
-                    val x = i * insetWidth * density - strokeWidth / 2
-                    drawLine(
-                        color,
-                        Offset(x, 0F),
-                        Offset(x, size.height),
-                        Stroke(strokeWidth)
-                    )
-                }
+    Clickable(
+        onClick = {
+            if (row.collapsed) {
+                row.expand(dispatch)
+            } else {
+                row.collapse(dispatch)
             }
-            .padding(start = gutterWidth)
+        },
+        modifier = Modifier.ripple()
     ) {
-        Spacer(Modifier.height(8.dp))
-        Subtitle(row.authorId, row.createdAt)
-        Spacer(modifier = Modifier.size(4.dp))
-        Text(row.text)
-        Spacer(Modifier.height(8.dp))
+        Column(
+            modifier = Modifier
+                .drawBehind {
+                    for (i in 0..row.depth) {
+                        val strokeWidth = 2 * density
+                        val x = i * insetWidth * density - strokeWidth / 2
+                        drawLine(
+                            color,
+                            Offset(x, 0F),
+                            Offset(x, size.height),
+                            Stroke(strokeWidth)
+                        )
+                    }
+                }
+                .fillMaxWidth()
+                .padding(start = gutterWidth)
+        ) {
+            Spacer(Modifier.height(8.dp))
+            Subtitle(row.authorId, row.createdAt)
+            Spacer(modifier = Modifier.size(4.dp))
+            if (row.collapsed) {
+                Text(Some("..."))
+            } else {
+                Text(row.text)
+            }
+            Spacer(Modifier.height(8.dp))
+        }
     }
 }
 
@@ -177,13 +199,28 @@ fun ItemDetailScreenPreview() {
                     0,
                     UserId("pg"),
                     UnixTime(System.currentTimeMillis() - DateUtils.MINUTE_IN_MILLIS * 8),
-                    Some("This turbulence has only been examined by a huge girl. Bravely gather a transporter.")
+                    Some("This turbulence has only been examined by a huge girl. Bravely gather a transporter."),
+                    false,
+                    {},
+                    {}
                 ),
                 Props.Row.Loaded(
                     1,
                     UserId("pardom"),
                     UnixTime(System.currentTimeMillis() - DateUtils.MINUTE_IN_MILLIS * 5),
-                    Some("Transporters reproduce with modification! Strange, ordinary parasites mechanically transform a colorful, remarkable alien. Starships yell with nuclear flux!")
+                    Some("Transporters reproduce with modification! Strange, ordinary parasites mechanically transform a colorful, remarkable alien. Starships yell with nuclear flux!"),
+                    false,
+                    {},
+                    {}
+                ),
+                Props.Row.Loaded(
+                    0,
+                    UserId("kensuke155"),
+                    UnixTime(System.currentTimeMillis() - DateUtils.MINUTE_IN_MILLIS * 2),
+                    Some("All the crewmates capture evasive, human queens. Human, distant aliens pedantically fight an ordinary, reliable c-beam. Why does the planet reproduce?"),
+                    true,
+                    {},
+                    {}
                 ),
                 Props.Row.Loading(1, ItemId(2))
             )
