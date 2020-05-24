@@ -8,7 +8,6 @@ import androidx.ui.core.drawBehind
 import androidx.ui.foundation.AdapterList
 import androidx.ui.foundation.Clickable
 import androidx.ui.foundation.Text
-import androidx.ui.foundation.drawBackground
 import androidx.ui.geometry.Offset
 import androidx.ui.graphics.Color
 import androidx.ui.graphics.painter.Stroke
@@ -35,11 +34,13 @@ import news.lambda.app.component.ItemDetailComponent.Props
 import news.lambda.model.ItemId
 import news.lambda.model.UnixTime
 import news.lambda.model.UserId
+import news.lambda.util.exhaustive
 import oolong.Dispatch
 
 sealed class AdapterType {
     data class Header(val header: Props.Header) : AdapterType()
     data class Row(val row: Props.Row) : AdapterType()
+    object Footer : AdapterType()
 }
 
 @Composable
@@ -50,22 +51,23 @@ fun ItemDetailScreen(props: Props, dispatch: Dispatch<Msg>) {
                 is Some -> listOf(AdapterType.Header(propsHeader.t))
                 else -> emptyList()
             }
-            val data = header + props.rows.map(AdapterType::Row)
+            val footer = listOf(AdapterType.Footer)
+            val data = header + props.rows.map(AdapterType::Row) + footer
             Column {
                 AdapterList(data) { item ->
                     when (item) {
-                        is AdapterType.Header -> Header(item.header, dispatch)
+                        is AdapterType.Header -> Header(item.header)
                         is AdapterType.Row -> Row(item.row, dispatch)
-                    }
+                        is AdapterType.Footer -> Footer()
+                    }.exhaustive
                 }
-                Spacer(modifier = Modifier.height(8.dp))
             }
         }
     )
 }
 
 @Composable
-fun Header(header: Props.Header, dispatch: Dispatch<Msg>) {
+fun Header(header: Props.Header) {
     Column {
         Preview(header.uri)
         Spacer(modifier = Modifier.size(16.dp))
@@ -73,9 +75,17 @@ fun Header(header: Props.Header, dispatch: Dispatch<Msg>) {
         Spacer(modifier = Modifier.size(4.dp))
         Subtitle(header.authorId, header.createdAt)
         Spacer(modifier = Modifier.size(16.dp))
-        Text(header.text)
-        Spacer(modifier = Modifier.size(16.dp))
+        if (header.text is Some) {
+            Text(header.text)
+            Spacer(modifier = Modifier.size(16.dp))
+        }
     }
+}
+
+@Composable
+fun Footer() {
+    Divider(color = Color(0xFFEAEAEA))
+    Spacer(modifier = Modifier.height(16.dp))
 }
 
 @Composable
@@ -109,7 +119,7 @@ fun Subtitle(author: UserId, createdAt: UnixTime) {
 fun Text(text: Option<String>) {
     if (text is Some) {
         // TODO: Compose doesn't have anything like Html.fromHtml() that produces an AnnotatedString
-        val html = Html.fromHtml(text.t).toString()
+        val html = Html.fromHtml(text.t).toString().trimEnd()
         Text(html, modifier = Modifier.padding(horizontal = 16.dp))
     }
 }
@@ -167,12 +177,13 @@ fun ItemRow(row: Props.Row.Loaded, dispatch: Dispatch<Msg>) {
                 .fillMaxWidth()
                 .padding(start = gutterWidth)
         ) {
+            if (row.depth == 0) {
+                Divider(color = Color(0xFFEAEAEA))
+            }
             Spacer(Modifier.height(8.dp))
             Subtitle(row.authorId, row.createdAt)
             Spacer(modifier = Modifier.size(4.dp))
-            if (row.collapsed) {
-                Text(Some("..."))
-            } else {
+            if (!row.collapsed) {
                 Text(row.text)
             }
             Spacer(Modifier.height(8.dp))
