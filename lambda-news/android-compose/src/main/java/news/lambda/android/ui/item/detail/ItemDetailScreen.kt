@@ -153,11 +153,12 @@ fun ItemLoading() {
 @Composable
 fun ItemRow(row: Props.Row.Loaded, dispatch: Dispatch<Msg>) {
     val color = Color(127, 127, 127, 0xFF)
+    val verticalPadding = 8.dp
     val insetWidth = 16
     val gutterWidth = (row.depth * insetWidth).dp
     Clickable(
         onClick = {
-            if (row.collapsed) {
+            if (row.isCollapsed) {
                 row.expand(dispatch)
             } else {
                 row.collapse(dispatch)
@@ -171,10 +172,15 @@ fun ItemRow(row: Props.Row.Loaded, dispatch: Dispatch<Msg>) {
                     for (i in 0..row.depth) {
                         val strokeWidth = 2 * density
                         val x = i * insetWidth * density - strokeWidth / 2
+                        val height = if (row.isLastInThread) {
+                            size.height - (verticalPadding.value * density)
+                        } else {
+                            size.height
+                        }
                         drawLine(
                             color,
                             Offset(x, 0F),
-                            Offset(x, size.height),
+                            Offset(x, height),
                             Stroke(strokeWidth)
                         )
                     }
@@ -185,13 +191,13 @@ fun ItemRow(row: Props.Row.Loaded, dispatch: Dispatch<Msg>) {
             if (row.depth == 0) {
                 Divider(color = Color(0xFFEAEAEA))
             }
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(verticalPadding))
             Subtitle(row.authorId, row.createdAt)
             Spacer(modifier = Modifier.size(4.dp))
-            if (!row.collapsed) {
+            if (!row.isCollapsed) {
                 Text(row.text)
             }
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(verticalPadding))
         }
     }
 }
@@ -217,6 +223,7 @@ fun ItemDetailScreenPreview() {
                     UnixTime(System.currentTimeMillis() - DateUtils.MINUTE_IN_MILLIS * 8),
                     Some("This turbulence has only been examined by a huge girl. Bravely gather a transporter."),
                     false,
+                    false,
                     {},
                     {}
                 ),
@@ -226,6 +233,7 @@ fun ItemDetailScreenPreview() {
                     UnixTime(System.currentTimeMillis() - DateUtils.MINUTE_IN_MILLIS * 5),
                     Some("Transporters reproduce with modification! Strange, ordinary parasites mechanically transform a colorful, remarkable alien. Starships yell with nuclear flux!"),
                     false,
+                    true,
                     {},
                     {}
                 ),
@@ -235,6 +243,7 @@ fun ItemDetailScreenPreview() {
                     UnixTime(System.currentTimeMillis() - DateUtils.MINUTE_IN_MILLIS * 2),
                     Some("All the crewmates capture evasive, human queens. Human, distant aliens pedantically fight an ordinary, reliable c-beam. Why does the planet reproduce?"),
                     true,
+                    false,
                     {},
                     {}
                 ),

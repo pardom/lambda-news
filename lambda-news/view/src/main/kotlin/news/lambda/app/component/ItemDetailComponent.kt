@@ -100,7 +100,8 @@ object ItemDetailComponent {
                 val authorId: UserId,
                 val createdAt: UnixTime,
                 val text: Option<String>,
-                val collapsed: Boolean,
+                val isCollapsed: Boolean,
+                val isLastInThread: Boolean,
                 val collapse: (Dispatch<Msg>) -> Unit,
                 val expand: (Dispatch<Msg>) -> Unit
             ) : Row()
@@ -212,8 +213,8 @@ object ItemDetailComponent {
                     item.data
                         .childIdsOption
                         .map { itemIds ->
-                            itemIds.flatMap { itemId ->
-                                viewRows(0, itemId, model)
+                            itemIds.withIndex().flatMap { (i, itemId) ->
+                                viewRows(0, true, itemId, model)
                             }.toSet()
                         }
                         .getOrElse { emptySet() }
@@ -224,20 +225,31 @@ object ItemDetailComponent {
 
     private fun viewRows(
         depth: Int,
+        isLastInThread: Boolean,
         itemId: ItemId,
         model: Model
     ): Set<Props.Row> {
         return when (val item = model.items[itemId]) {
             is RemoteData.Success -> {
                 val collapsed = itemId in model.collapsedItemIds
-                val itemRow = viewRow(depth, itemId, model)
+                val itemRow = viewRow(
+                    depth,
+                    isLastInThread && item.data.childIdsOption.getOrElse(::emptySet).isEmpty(),
+                    itemId,
+                    model
+                )
                 val childRows = if (collapsed) {
                     emptySet()
                 } else {
                     item.data.childIdsOption
                         .map { itemIds ->
-                            itemIds.flatMap { itemId ->
-                                viewRows(depth + 1, itemId, model)
+                            itemIds.withIndex().flatMap { (i, itemId) ->
+                                viewRows(
+                                    depth + 1,
+                                    isLastInThread && i == itemIds.indices.last,
+                                    itemId,
+                                    model
+                                )
                             }.toSet()
                         }
                         .getOrElse { emptySet() }
@@ -245,12 +257,12 @@ object ItemDetailComponent {
                 setOf(itemRow) + childRows
             }
             null -> emptySet()
-            else -> setOf(viewRow(depth, itemId, model))
+            else -> setOf(viewRow(depth, false, itemId, model))
         }
     }
 
-    private val viewRow: (Int, ItemId, Model) -> Props.Row =
-        { depth, itemId, model ->
+    private val viewRow: (Int, Boolean, ItemId, Model) -> Props.Row =
+        { depth, isLastInThread, itemId, model ->
             when (val item = model.items.getValue(itemId)) {
                 NotAsked -> Props.Row.Id(depth, itemId) { dispatch ->
                     dispatch(
@@ -267,6 +279,7 @@ object ItemDetailComponent {
                     item.data.createdAt,
                     item.data.textOption,
                     item.data.id in model.collapsedItemIds,
+                    isLastInThread,
                     { dispatch -> dispatch(Msg.ItemCollapsed(itemId)) },
                     { dispatch -> dispatch(Msg.ItemExpanded(itemId)) }
                 )
