@@ -6,7 +6,9 @@ import androidx.compose.Composable
 import androidx.ui.core.Modifier
 import androidx.ui.core.drawBehind
 import androidx.ui.foundation.AdapterList
+import androidx.ui.foundation.Box
 import androidx.ui.foundation.Clickable
+import androidx.ui.foundation.ContentGravity
 import androidx.ui.foundation.Text
 import androidx.ui.geometry.Offset
 import androidx.ui.graphics.Color
@@ -138,11 +140,14 @@ fun Row(row: Props.Row, dispatch: Dispatch<Msg>) {
 
 @Composable
 fun ItemLoading() {
-    CircularProgressIndicator(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-    )
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        gravity = ContentGravity.Center
+    ) {
+        CircularProgressIndicator()
+    }
 }
 
 @Composable
