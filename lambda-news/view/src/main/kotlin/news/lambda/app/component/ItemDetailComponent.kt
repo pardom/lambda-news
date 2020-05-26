@@ -16,6 +16,7 @@ import news.lambda.model.RemoteData.Loading
 import news.lambda.model.RemoteData.NotAsked
 import news.lambda.model.UnixTime
 import news.lambda.model.UserId
+import news.lambda.model.fix
 import news.lambda.model.toRemoteData
 import news.lambda.util.msgEffect
 import oolong.Dispatch
@@ -213,8 +214,8 @@ object ItemDetailComponent {
                     item.data
                         .childIdsOption
                         .map { itemIds ->
-                            itemIds.withIndex().flatMap { (i, itemId) ->
-                                viewRows(0, true, itemId, model)
+                            itemIds.flatMap { itemId ->
+                                viewRowR(0, true, itemId, model)
                             }.toSet()
                         }
                         .getOrElse { emptySet() }
@@ -223,43 +224,42 @@ object ItemDetailComponent {
             }
         }
 
-    private fun viewRows(
-        depth: Int,
-        isLastInThread: Boolean,
-        itemId: ItemId,
-        model: Model
-    ): Set<Props.Row> {
-        return when (val item = model.items[itemId]) {
-            is RemoteData.Success -> {
-                val collapsed = itemId in model.collapsedItemIds
-                val itemRow = viewRow(
-                    depth,
-                    isLastInThread && item.data.childIdsOption.getOrElse(::emptySet).isEmpty(),
-                    itemId,
-                    model
-                )
-                val childRows = if (collapsed) {
-                    emptySet()
-                } else {
-                    item.data.childIdsOption
-                        .map { itemIds ->
-                            itemIds.withIndex().flatMap { (i, itemId) ->
-                                viewRows(
-                                    depth + 1,
-                                    isLastInThread && i == itemIds.indices.last,
-                                    itemId,
-                                    model
-                                )
-                            }.toSet()
+    private val viewRowR: (Int, Boolean, ItemId, Model) -> Set<Props.Row> =
+        fix { viewRowR: (Int, Boolean, ItemId, Model) -> Set<Props.Row> ->
+            { depth, isLastInThread, itemId, model ->
+                when (val item = model.items[itemId]) {
+                    is RemoteData.Success -> {
+                        val collapsed = itemId in model.collapsedItemIds
+                        val itemRow = viewRow(
+                            depth,
+                            isLastInThread && item.data.childIdsOption.getOrElse(::emptySet)
+                                .isEmpty(),
+                            itemId,
+                            model
+                        )
+                        val childRows = if (collapsed) {
+                            emptySet()
+                        } else {
+                            item.data.childIdsOption
+                                .map { itemIds ->
+                                    itemIds.withIndex().flatMap { (i, itemId) ->
+                                        viewRowR(
+                                            depth + 1,
+                                            isLastInThread && i == itemIds.indices.last,
+                                            itemId,
+                                            model
+                                        )
+                                    }.toSet()
+                                }
+                                .getOrElse { emptySet() }
                         }
-                        .getOrElse { emptySet() }
+                        setOf(itemRow) + childRows
+                    }
+                    null -> emptySet()
+                    else -> setOf(viewRow(depth, false, itemId, model))
                 }
-                setOf(itemRow) + childRows
             }
-            null -> emptySet()
-            else -> setOf(viewRow(depth, false, itemId, model))
         }
-    }
 
     private val viewRow: (Int, Boolean, ItemId, Model) -> Props.Row =
         { depth, isLastInThread, itemId, model ->
