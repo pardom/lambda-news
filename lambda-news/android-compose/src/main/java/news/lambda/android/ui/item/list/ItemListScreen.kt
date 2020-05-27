@@ -15,6 +15,7 @@ import androidx.ui.layout.Row
 import androidx.ui.layout.Spacer
 import androidx.ui.layout.fillMaxWidth
 import androidx.ui.layout.height
+import androidx.ui.layout.heightIn
 import androidx.ui.layout.padding
 import androidx.ui.layout.size
 import androidx.ui.layout.width
@@ -177,7 +178,10 @@ fun ItemRow(item: Item) {
         modifier = Modifier.ripple().fillMaxWidth()
     ) {
         val uri = item.uriOption
-        Row(modifier = Modifier.padding(16.dp)) {
+        Row(
+            modifier = Modifier.padding(16.dp).heightIn(minHeight = 24.dp),
+            verticalGravity = Alignment.CenterVertically
+        ) {
             Column(
                 modifier = Modifier.weight(1F)
             ) {
@@ -243,6 +247,24 @@ fun JobRowPreview() {
             42,
             "Oolong maintainers wanted",
             Some(Uri.parse("https://github.com/oolong-kt/oolong"))
+        )
+    )
+}
+
+@Preview
+@Composable
+fun AskRowPreview() {
+    ItemRow(
+        Item.Ask(
+            ItemId(0),
+            UserId("pardom"),
+            UnixTime(System.currentTimeMillis() - DateUtils.MINUTE_IN_MILLIS * 23),
+            emptySet(),
+            0,
+            42,
+            "Oolong maintainers wanted",
+            None,
+            None
         )
     )
 }
