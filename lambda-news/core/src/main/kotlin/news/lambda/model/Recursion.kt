@@ -1,45 +1,31 @@
 package news.lambda.model
 
-class FunR<T, R>(private val f: (FunR<T, R>) -> (T) -> R) {
-    operator fun invoke(a: FunR<T, R>): (T) -> R = f(a)
+typealias Endo<A> = (A) -> A
+
+data class Fix<A, B>(private val f: (Fix<A, B>) -> (A) -> B) {
+    operator fun invoke(a: Fix<A, B>): (A) -> B = f(a)
 }
 
-class FunR1<T1, T2, R>(private val f: (FunR1<T1, T2, R>) -> (T1, T2) -> R) {
-    operator fun invoke(a: FunR1<T1, T2, R>): (T1, T2) -> R = f(a)
+data class Fix1<A, B, C>(private val f: (Fix1<A, B, C>) -> (A, B) -> C) {
+    operator fun invoke(a: Fix1<A, B, C>): (A, B) -> C = f(a)
 }
 
-class FunR2<T1, T2, T3, R>(private val f: (FunR2<T1, T2, T3, R>) -> (T1, T2, T3) -> R) {
-    operator fun invoke(a: FunR2<T1, T2, T3, R>): (T1, T2, T3) -> R = f(a)
+data class Fix2<A, B, C, D>(private val f: (Fix2<A, B, C, D>) -> (A, B, C) -> D) {
+    operator fun invoke(a: Fix2<A, B, C, D>): (A, B, C) -> D = f(a)
 }
 
-class FunR3<T1, T2, T3, T4, R>(private val f: (FunR3<T1, T2, T3, T4, R>) -> (T1, T2, T3, T4) -> R) {
-    operator fun invoke(a: FunR3<T1, T2, T3, T4, R>): (T1, T2, T3, T4) -> R = f(a)
+data class Fix3<A, B, C, D, E>(private val f: (Fix3<A, B, C, D, E>) -> (A, B, C, D) -> E) {
+    operator fun invoke(a: Fix3<A, B, C, D, E>): (A, B, C, D) -> E = f(a)
 }
 
-fun <T, R> fix(f: ((T) -> R) -> (T) -> R): (T) -> R =
-    FunR<T, R> { g ->
-        f { t1 ->
-            g(g)(t1)
-        }
-    }.let { g -> g(g) }
+fun <A, B> fix(f: Endo<(A) -> B>): (A) -> B =
+    Fix<A, B> { g -> f { a -> g(g)(a) } }.let { g -> g(g) }
 
-fun <T1, T2, R> fix(f: ((T1, T2) -> R) -> (T1, T2) -> R): (T1, T2) -> R =
-    FunR1<T1, T2, R> { g ->
-        f { t1, t2 ->
-            g(g)(t1, t2)
-        }
-    }.let { g -> g(g) }
+fun <A, B, C> fix(f: Endo<(A, B) -> C>): (A, B) -> C =
+    Fix1<A, B, C> { g -> f { a, b -> g(g)(a, b) } }.let { g -> g(g) }
 
-fun <T1, T2, T3, R> fix(f: ((T1, T2, T3) -> R) -> (T1, T2, T3) -> R): (T1, T2, T3) -> R =
-    FunR2<T1, T2, T3, R> { g ->
-        f { t1, t2, t3 ->
-            g(g)(t1, t2, t3)
-        }
-    }.let { g -> g(g) }
+fun <A, B, C, D> fix(f: Endo<(A, B, C) -> D>): (A, B, C) -> D =
+    Fix2<A, B, C, D> { g -> f { a, b, c -> g(g)(a, b, c) } }.let { g -> g(g) }
 
-fun <T1, T2, T3, T4, R> fix(f: ((T1, T2, T3, T4) -> R) -> (T1, T2, T3, T4) -> R): (T1, T2, T3, T4) -> R =
-    FunR3<T1, T2, T3, T4, R> { g ->
-        f { t1, t2, t3, t4 ->
-            g(g)(t1, t2, t3, t4)
-        }
-    }.let { g -> g(g) }
+fun <A, B, C, D, E> fix(f: Endo<(A, B, C, D) -> E>): (A, B, C, D) -> E =
+    Fix3<A, B, C, D, E> { g -> f { a, b, c, d -> g(g)(a, b, c, d) } }.let { g -> g(g) }
