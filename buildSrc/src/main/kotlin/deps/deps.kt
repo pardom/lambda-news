@@ -1,7 +1,7 @@
 package deps
 
 object Android {
-    object Gradle : Group("com.android.tools.build", "4.1.0-alpha09") {
+    object Gradle : Group("com.android.tools.build", "4.1.0-alpha10") {
         val Plugin = artifact("gradle")
     }
 
