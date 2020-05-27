@@ -60,7 +60,6 @@ fun Title(title: Option<String>) {
             title.t,
             modifier = Modifier.tag("title"),
             overflow = TextOverflow.Ellipsis,
-            maxLines = 2,
             style = MaterialTheme.typography.subtitle1
         )
     }
