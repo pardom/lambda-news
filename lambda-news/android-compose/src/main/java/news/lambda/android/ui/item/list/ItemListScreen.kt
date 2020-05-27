@@ -5,8 +5,10 @@ import androidx.compose.Composable
 import androidx.ui.core.Alignment
 import androidx.ui.core.Modifier
 import androidx.ui.foundation.AdapterList
+import androidx.ui.foundation.Box
 import androidx.ui.foundation.Clickable
 import androidx.ui.foundation.Text
+import androidx.ui.foundation.shape.corner.RoundedCornerShape
 import androidx.ui.graphics.Color
 import androidx.ui.layout.Column
 import androidx.ui.layout.Row
@@ -36,7 +38,6 @@ import news.lambda.android.ui.app.NavigatorAmbient
 import news.lambda.android.ui.item.Favicon
 import news.lambda.android.ui.item.RoundedPreview
 import news.lambda.android.ui.item.Source
-import news.lambda.android.ui.item.Subtitle
 import news.lambda.android.ui.item.Title
 import news.lambda.app.component.ItemListComponent.Msg
 import news.lambda.app.component.ItemListComponent.Props
@@ -118,16 +119,48 @@ fun ItemList(rows: List<Props.Body.Row>, dispatch: Dispatch<Msg>) {
             is Props.Body.Row.Loading -> Loading()
             is Props.Body.Row.Loaded -> ItemRow(row.item)
         }
-        Divider(color = Color(0xFFEAEAEA))
+        Divider(
+            modifier = Modifier.padding(horizontal = 16.dp),
+            color = Color(0xFFEAEAEA)
+        )
     }
 }
 
 @Composable
 fun Loading() {
-    Column(modifier = Modifier.fillMaxWidth() + Modifier.padding(16.dp, 8.dp, 16.dp, 8.dp)) {
-        PlaceholderText("", modifier = Modifier.fillMaxWidth())
-        PlaceholderText("michaelpardo.com")
-        PlaceholderText("34 comments - pardom - 2 hours ago")
+    Row(
+        modifier = Modifier.padding(16.dp),
+        verticalGravity = Alignment.CenterVertically
+    ) {
+        val color = Color(0x22000000)
+        Column(modifier = Modifier.weight(1F)) {
+            Row(verticalGravity = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier.size(12.dp),
+                    shape = RoundedCornerShape(2.dp),
+                    backgroundColor = color
+                )
+                Spacer(modifier = Modifier.width(2.dp))
+                PlaceholderText(
+                    "http://lambda.news",
+                    color = color,
+                    style = MaterialTheme.typography.caption
+                )
+            }
+            Spacer(modifier = Modifier.height(4.dp))
+            PlaceholderText(
+                "Lambda News, Lambda News, Lambda News, Lambda News, Lambda News, Lambda News",
+                color = color,
+                style = MaterialTheme.typography.subtitle1,
+                maxLines = 1
+            )
+        }
+        Spacer(modifier = Modifier.width(16.dp))
+        Box(
+            modifier = Modifier.size(56.dp),
+            shape = RoundedCornerShape(4.dp),
+            backgroundColor = color
+        )
     }
 }
 
@@ -144,28 +177,23 @@ fun ItemRow(item: Item) {
         modifier = Modifier.ripple().fillMaxWidth()
     ) {
         val uri = item.uriOption
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalGravity = Alignment.CenterVertically
-        ) {
+        Row(modifier = Modifier.padding(16.dp)) {
             Column(
                 modifier = Modifier.weight(1F)
             ) {
                 if (uri is Some) {
                     Row(verticalGravity = Alignment.CenterVertically) {
                         Favicon(uri.t)
-                        Spacer(modifier = Modifier.width(4.dp))
+                        Spacer(modifier = Modifier.width(2.dp))
                         Source(uri.t)
                     }
-                    Spacer(modifier = Modifier.size(4.dp))
+                    Spacer(modifier = Modifier.height(4.dp))
                 }
                 Title(item.titleOption)
-                Spacer(modifier = Modifier.size(4.dp))
-                Subtitle(item.authorId, item.createdAt)
             }
             if (uri is Some) {
-                Spacer(modifier = Modifier.size(8.dp))
-                RoundedPreview(uri.t, Modifier.height(64.dp), 1F)
+                Spacer(modifier = Modifier.width(8.dp))
+                RoundedPreview(uri.t, Modifier.height(56.dp), 1F)
             }
         }
     }
@@ -179,6 +207,12 @@ fun Id(id: Props.Body.Row.Id, dispatch: Dispatch<Msg>) {
 
 ////////////////////////////////////////////////////////////////////////////////
 // Previews
+
+@Preview
+@Composable
+fun LoadingPreview() {
+    Loading()
+}
 
 @Preview
 @Composable

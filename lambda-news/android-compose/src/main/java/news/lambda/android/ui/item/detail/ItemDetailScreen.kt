@@ -24,6 +24,7 @@ import androidx.ui.material.Divider
 import androidx.ui.material.MaterialTheme
 import androidx.ui.material.Scaffold
 import androidx.ui.material.ripple.ripple
+import androidx.ui.text.font.FontWeight
 import androidx.ui.tooling.preview.Preview
 import androidx.ui.unit.dp
 import arrow.core.Option
@@ -70,8 +71,9 @@ fun ItemDetailScreen(props: Props, dispatch: Dispatch<Msg>) {
 
 @Composable
 fun Header(header: Props.Header) {
+    val uri = header.uri
     Column {
-        Preview(header.uri)
+        Preview(uri)
         Spacer(modifier = Modifier.size(16.dp))
         Title(header.title)
         Spacer(modifier = Modifier.size(4.dp))
@@ -103,7 +105,7 @@ fun Title(title: Option<String>) {
         Text(
             title.t,
             modifier = Modifier.padding(horizontal = 16.dp),
-            style = MaterialTheme.typography.h5
+            style = MaterialTheme.typography.h5.copy(fontWeight = FontWeight.Bold)
         )
     }
 }
@@ -111,7 +113,7 @@ fun Title(title: Option<String>) {
 @Composable
 fun Subtitle(author: UserId, createdAt: UnixTime) {
     Text(
-        "${createdAt.timeAgo} by ${author.value}",
+        "${author.value} · ${createdAt.timeAgo}",
         modifier = Modifier.padding(horizontal = 16.dp),
         style = MaterialTheme.typography.caption
     )
